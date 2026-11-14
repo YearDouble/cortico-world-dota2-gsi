@@ -1,0 +1,69 @@
+{
+  "name": "cortico-world-dota2-gsi",
+  "version": "0.1.3",
+  "type": "module",
+  "main": "src/index.js",
+  "license": "MIT",
+  "author": "year",
+  "description": "将 Dota 2 官方接口提供的实时对局数据传递给 Coo，包括：\n\n英雄、等级、生命值、魔法值、金钱、补刀、战绩、装备及冷却时间、复活与买活时间、双方比分、游戏时间和昼夜状态，以及对局的开始和结束时间。\n\n对局中出现状态变化时，会向 Coo 发送简短记录，没有新事件时不会重复发送。Coo 也可以随时主动读取当前的最新数据。\n\n扩展只负责采集和传递数据，不负责分析局势或决定是否发言。如何理解这些数据、是否据此作出回应，由 Coo 自行处理。\n\n数据仅来自 Dota 2 官方本地接口，范围限于本机玩家可以获取的信息。击杀者身份、敌方装备、其他玩家在地图上的动态等接口未提供的数据，无法获取。\n\n接口由官方提供，无三方风险，只读监听本机游戏，不操作游戏，不记录账号信息，不保存对局历史。\n\n## 安装\n\n**1. Steam 启动选项**\n\n库里右键 Dota 2 → 属性 → 通用 → 启动选项。国服两项一起写：\n\n```\n-perfectworld -gamestateintegration\n```\n\n国际服只写 `-gamestateintegration`，顺序无所谓。\n\n**2. 写配置文件**\n\n装好后打开扩展面板，点「写入 Dota 配置」。找不到游戏目录时，面板会给出路径和文件内容，手动放一样能用。\n\n**3. 重启游戏**\n\n启动选项和配置只在游戏启动时读取，完全退出再开。\n\n面板上的「连接」变绿，说明数据到了。",
+  "keywords": [
+    "cortico-world",
+    "world",
+    "cortico",
+    "coopanion",
+    "dota2",
+    "gsi"
+  ],
+  "os": [
+    "win32"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "describe": "node tools/build-describe.mjs"
+  },
+  "files": [
+    "src",
+    "data",
+    "assets",
+    "client.js",
+    "client.css",
+    "ENV_PROMPT.md",
+    "describe.json",
+    "LICENSE"
+  ],
+  "cortico": {
+    "kind": "world",
+    "api": 6,
+    "displayName": "刀塔战况",
+    "webUiClient": "client.js",
+    "webUiStyle": "client.css",
+    "describe": "describe.json",
+    "icon": "assets/icon.png",
+    "tags": [
+      "dota2",
+      "game",
+      "gsi"
+    ],
+    "locales": {
+      "zh": {
+        "displayName": "刀塔战况",
+        "description": "把 Dota 2 这一局的英雄、血蓝、金钱、装备、比分和复活时间读给 Coo，有变化时给她发一条记录。只读，只在本机。"
+      },
+      "en": {
+        "displayName": "Dota 2 Live",
+        "description": "Reads Dota 2's official Game State Integration so Coo can see your hero, health, mana, gold, items, score and respawn timer, and sends her a note when something changes. Read-only and loopback only."
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YearDouble/cortico-world-dota2-gsi.git"
+  },
+  "homepage": "https://github.com/YearDouble/cortico-world-dota2-gsi#readme",
+  "bugs": {
+    "url": "https://github.com/YearDouble/cortico-world-dota2-gsi/issues"
+  }
+}

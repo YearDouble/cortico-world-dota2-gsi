@@ -1,0 +1,1290 @@
+[
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763000000
+    },
+    "player": {
+      "steamid": "76561190000000000",
+      "accountid": "123456789",
+      "name": "year",
+      "activity": "menu",
+      "team_name": "radiant",
+      "kills": 0,
+      "deaths": 0,
+      "assists": 0,
+      "gold": 0,
+      "last_hits": 0,
+      "denies": 0,
+      "gpm": 0,
+      "xpm": 0,
+      "net_worth": 0
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763000060
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_HERO_SELECTION",
+      "game_time": 0,
+      "clock_time": -120,
+      "daytime": true,
+      "radiant_score": 0,
+      "dire_score": 0,
+      "roshan_respawn_timer": 0
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 0,
+      "deaths": 0,
+      "assists": 0,
+      "gold": 600
+    },
+    "draft": {
+      "activeteam": 0,
+      "pick": false,
+      "pick_time_remaining": 26
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763000120
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_STRATEGY_TIME",
+      "game_time": 0,
+      "clock_time": -60,
+      "daytime": true,
+      "radiant_score": 0,
+      "dire_score": 0,
+      "roshan_respawn_timer": 0
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 0,
+      "deaths": 0,
+      "assists": 0,
+      "gold": 600
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 1,
+      "health": 560,
+      "max_health": 560,
+      "mana": 200,
+      "max_mana": 200,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 0,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false,
+      "silenced": false,
+      "stunned": false,
+      "hexed": false,
+      "muted": false,
+      "disarmed": false,
+      "magicimmune": false,
+      "smoked": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 0,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 0,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 0,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 0,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763000200
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 0,
+      "clock_time": 0,
+      "daytime": true,
+      "radiant_score": 0,
+      "dire_score": 0,
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 0,
+      "deaths": 0,
+      "assists": 0,
+      "gold": 600,
+      "last_hits": 0,
+      "denies": 0,
+      "gpm": 0,
+      "xpm": 0,
+      "net_worth": 600
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 1,
+      "health": 560,
+      "max_health": 560,
+      "mana": 200,
+      "max_mana": 200,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 0,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 1,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 0,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 0,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 0,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "empty"
+      },
+      "slot1": {
+        "name": "empty"
+      },
+      "slot2": {
+        "name": "empty"
+      },
+      "slot3": {
+        "name": "empty"
+      },
+      "slot4": {
+        "name": "empty"
+      },
+      "slot5": {
+        "name": "empty"
+      },
+      "slot6": {
+        "name": "empty"
+      },
+      "slot7": {
+        "name": "empty"
+      },
+      "slot8": {
+        "name": "empty"
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      },
+      "neutral0": {
+        "name": "empty"
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763000800
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 600,
+      "clock_time": 600,
+      "daytime": true,
+      "radiant_score": 3,
+      "dire_score": 0,
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 3,
+      "deaths": 0,
+      "assists": 2,
+      "gold": 1200,
+      "gold_reliable": 0,
+      "gold_unreliable": 1200,
+      "last_hits": 80,
+      "denies": 4,
+      "gpm": 450,
+      "xpm": 500,
+      "net_worth": 3600
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 9,
+      "health": 900,
+      "max_health": 900,
+      "mana": 300,
+      "max_mana": 400,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 300,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 1,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      },
+      "neutral0": {
+        "name": "empty"
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763000801
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 600,
+      "clock_time": 600,
+      "daytime": true,
+      "radiant_score": 3,
+      "dire_score": 0,
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 3,
+      "deaths": 0,
+      "assists": 2,
+      "gold": 1200,
+      "gold_reliable": 0,
+      "gold_unreliable": 1200,
+      "last_hits": 80,
+      "denies": 4,
+      "gpm": 450,
+      "xpm": 500,
+      "net_worth": 3600
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 9,
+      "health": 900,
+      "max_health": 900,
+      "mana": 300,
+      "max_mana": 400,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 300,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 1,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763001000
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 1000,
+      "clock_time": 1000,
+      "daytime": true,
+      "radiant_score": 3,
+      "dire_score": 1,
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 3,
+      "deaths": 1,
+      "assists": 2,
+      "gold": 700,
+      "gold_reliable": 0,
+      "gold_unreliable": 700,
+      "last_hits": 110,
+      "denies": 5,
+      "gpm": 430,
+      "xpm": 490,
+      "net_worth": 4200
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 10,
+      "health": 0,
+      "max_health": 1000,
+      "mana": 120,
+      "max_mana": 420,
+      "alive": false,
+      "respawn_seconds": 45,
+      "buyback_cost": 520,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 1,
+        "can_cast": false,
+        "passive": false,
+        "cooldown": 12,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763001046
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 1046,
+      "clock_time": 1046,
+      "daytime": true,
+      "radiant_score": 3,
+      "dire_score": 1,
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 3,
+      "deaths": 1,
+      "assists": 2,
+      "gold": 900,
+      "gold_reliable": 0,
+      "gold_unreliable": 900,
+      "last_hits": 112,
+      "denies": 5,
+      "gpm": 430,
+      "xpm": 490,
+      "net_worth": 4400
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 10,
+      "health": 1000,
+      "max_health": 1000,
+      "mana": 420,
+      "max_mana": 420,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 520,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 1,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763001200
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 1200,
+      "clock_time": 1200,
+      "daytime": true,
+      "radiant_score": 3,
+      "dire_score": 1,
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 3,
+      "deaths": 1,
+      "assists": 2,
+      "gold": 120,
+      "gold_reliable": 0,
+      "gold_unreliable": 120,
+      "last_hits": 130,
+      "denies": 6,
+      "gpm": 440,
+      "xpm": 495,
+      "net_worth": 7200
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 10,
+      "health": 1000,
+      "max_health": 1000,
+      "mana": 420,
+      "max_mana": 420,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 520,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 1,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot2": {
+        "name": "item_black_king_bar",
+        "count": 1,
+        "cooldown": 12,
+        "passive": false
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763001400
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 1400,
+      "clock_time": 1400,
+      "daytime": true,
+      "radiant_score": 3,
+      "dire_score": 1,
+      "roshan_respawn_timer": 480,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 4,
+      "deaths": 1,
+      "assists": 2,
+      "gold": 800,
+      "gold_reliable": 0,
+      "gold_unreliable": 800,
+      "last_hits": 150,
+      "denies": 6,
+      "gpm": 445,
+      "xpm": 500,
+      "net_worth": 7600
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 11,
+      "health": 1060,
+      "max_health": 1060,
+      "mana": 300,
+      "max_mana": 440,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 560,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": false
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 2,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot2": {
+        "name": "item_black_king_bar",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 0,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763001880
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+      "game_time": 1880,
+      "clock_time": 1880,
+      "daytime": false,
+      "radiant_score": 3,
+      "dire_score": 1,
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 4,
+      "deaths": 1,
+      "assists": 2,
+      "gold": 900,
+      "gold_reliable": 0,
+      "gold_unreliable": 900,
+      "last_hits": 190,
+      "denies": 8,
+      "gpm": 450,
+      "xpm": 505,
+      "net_worth": 8900
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 12,
+      "health": 1120,
+      "max_health": 1120,
+      "mana": 320,
+      "max_mana": 460,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 600,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": false,
+      "aghanims_shard": true
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 2,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot2": {
+        "name": "item_black_king_bar",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 0,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      }
+    }
+  },
+  {
+    "provider": {
+      "name": "Dota 2",
+      "appid": 570,
+      "version": 46,
+      "timestamp": 1763002400
+    },
+    "map": {
+      "name": "start",
+      "matchid": "7600000001",
+      "game_state": "DOTA_GAMERULES_STATE_POST_GAME",
+      "game_time": 2400,
+      "clock_time": 2400,
+      "daytime": false,
+      "radiant_score": 28,
+      "dire_score": 21,
+      "win_team": "radiant",
+      "roshan_respawn_timer": 0,
+      "paused": false
+    },
+    "player": {
+      "team_name": "radiant",
+      "kills": 12,
+      "deaths": 5,
+      "assists": 9,
+      "gold": 18900,
+      "gold_reliable": 0,
+      "gold_unreliable": 18900,
+      "last_hits": 312,
+      "denies": 14,
+      "gpm": 540,
+      "xpm": 620,
+      "net_worth": 24800
+    },
+    "hero": {
+      "id": 11,
+      "name": "npc_dota_hero_nevermore",
+      "level": 25,
+      "health": 1420,
+      "max_health": 1420,
+      "mana": 560,
+      "max_mana": 560,
+      "alive": true,
+      "respawn_seconds": 0,
+      "buyback_cost": 1200,
+      "buyback_cooldown": 0,
+      "aghanims_scepter": true,
+      "aghanims_shard": true
+    },
+    "abilities": {
+      "ability0": {
+        "name": "nevermore_shadowraze1",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability1": {
+        "name": "nevermore_shadowraze2",
+        "level": 4,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability2": {
+        "name": "nevermore_necromastery",
+        "level": 4,
+        "can_cast": false,
+        "passive": true,
+        "cooldown": 0,
+        "ultimate": false
+      },
+      "ability3": {
+        "name": "nevermore_requiem",
+        "level": 3,
+        "can_cast": true,
+        "passive": false,
+        "cooldown": 0,
+        "ultimate": true
+      }
+    },
+    "items": {
+      "slot0": {
+        "name": "item_blink",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot1": {
+        "name": "item_power_treads",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot2": {
+        "name": "item_black_king_bar",
+        "count": 1,
+        "cooldown": 0,
+        "passive": false
+      },
+      "slot3": {
+        "name": "item_ultimate_scepter",
+        "count": 1,
+        "cooldown": 0,
+        "passive": true
+      },
+      "teleport0": {
+        "name": "item_tpscroll",
+        "cooldown": 0,
+        "charges": 1
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower1_mid": {
+          "health": 1800,
+          "max_health": 1800
+        },
+        "dota_goodguys_tower1_top": {
+          "health": 1800,
+          "max_health": 1800
+        }
+      },
+      "dire": {
+        "dota_badguys_tower1_mid": {
+          "health": 0,
+          "max_health": 1800
+        },
+        "dota_badguys_tower1_top": {
+          "health": 0,
+          "max_health": 1800
+        }
+      }
+    }
+  }
+]
