@@ -19,6 +19,7 @@ const SAMPLE_FILE = path.join(PACKAGE_DIR, 'data', 'sample-match.json')
 
 const DEFAULT_NET = { port: 35123, throttle: 0.5, heartbeat: 10 }
 const DEFAULT_DISPLAY = { rawKeys: false }
+const DEFAULT_MODE = { force: 'auto' }
 
 function num(value, fallback) {
   const n = Number(value)
@@ -74,6 +75,11 @@ class DotaWorld {
       if (cfg.display?.[key] === undefined) display[key] = value
     }
     if (Object.keys(display).length > 0) patch.display = display
+    const mode = {}
+    for (const [key, value] of Object.entries(DEFAULT_MODE)) {
+      if (cfg.mode?.[key] === undefined) mode[key] = value
+    }
+    if (Object.keys(mode).length > 0) patch.mode = mode
     if (Object.keys(patch).length > 0 && typeof this.ctx.persist === 'function') this.ctx.persist(patch)
   }
 
@@ -84,6 +90,7 @@ class DotaWorld {
     this.state = new DotaState({
       names: this.names,
       rawKeys: this.ctx.cfg?.display?.rawKeys === true,
+      cfg: this.ctx.cfg,
     })
     await this.startReceiver()
     this.staleTimer = setInterval(() => {
@@ -179,7 +186,10 @@ class DotaWorld {
   }
 
   tools() {
-    return createTools(this.state, { timezone: this.ctx.timezone })
+    return createTools(this.state, {
+      timezone: this.ctx.timezone,
+      persist: (patch) => this.ctx?.persist?.(patch),
+    })
   }
 
   envPromptVars() {
@@ -363,6 +373,27 @@ class DotaWorld {
             },
           },
         },
+        {
+          id: 'dota2-gsi.mode',
+          owner: `world:${WORLD_ID}`,
+          schema: {
+            type: 'object',
+            title: en ? 'Mode' : '模式',
+            description: en
+              ? 'Match mode: auto = inferred (bounty rune value/cadence, Roshan sighting). Pick Turbo or Regular to override — takes effect immediately, survives restarts, and Coo can change it too with the dota_mode tool.'
+              : '对局模式：自动=推断（赏金符金额/节奏、肉山露头）。手动选加速/常规后立即生效并保留，Coo 也能用 dota_mode 工具改；设回自动恢复推断。',
+            properties: {
+              [`${CFG}.mode.force`]: {
+                type: 'string',
+                title: en ? 'Force mode' : '指定模式',
+                description: en ? 'auto / regular / turbo' : 'auto=自动推断、regular=常规、turbo=加速',
+                enum: ['auto', 'regular', 'turbo'],
+                default: 'auto',
+                'x-hot': true,
+              },
+            },
+          },
+        },
       ],
       promptDocs: [
         {
@@ -378,9 +409,7 @@ class DotaWorld {
       ],
       invoke: async (panel, method, args) => this.invokePanel(panel, method, args),
     }
-  }
-
-  detectDota(force = false) {
+  }  detectDota(force = false) {
     const now = Date.now()
     if (!force && this.dotaCache && now - this.dotaCache.at < 60_000) return this.dotaCache.value
     const found = gsi.findDotaCfgDir()
@@ -502,6 +531,7 @@ export default {
     enabled: false,
     net: { ...DEFAULT_NET },
     display: { ...DEFAULT_DISPLAY },
+    mode: { ...DEFAULT_MODE },
   }),
   describe: { tools: TOOL_DECLS, events: EVENT_DECLS },
   create(ctx) {

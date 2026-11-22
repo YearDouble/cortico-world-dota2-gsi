@@ -46,7 +46,7 @@ export class ModeInference {
   reset() {
     /** unknown | regular | turbo */
     this.mode = 'unknown'
-    /** 判定依据：game_mode / bounty / roshan / creep / income / xpm，面板上看。 */
+    /** 判定依据：game_mode / bounty / roshan / creep / income / xpm / manual，面板上看。 */
     this.basis = null
     /** 实测值，面板核对用。 */
     this.xpm = null
@@ -54,10 +54,33 @@ export class ModeInference {
     this.creepBounty = null
     /** 赏金符拾取（game_time 基准）+ 金额，节奏/金额两条推断的原始数据。 */
     this.bountyPickups = []
+    // 换局重置只清推断；手动指定是设置里存着的，继续有效。
+    if (this.forced) {
+      this.mode = this.forced
+      this.basis = 'manual'
+    }
+  }
+
+  /**
+   * 手动指定（year 2026-11-22 定的兜底：用户在面板设置里选，Coo 用 dota_mode 工具改）。
+   * 手动优先于一切推断，写进设置保留，设回 auto 恢复推断。同一局内重复设同一值是无害的。
+   */
+  setForced(value) {
+    const next = value === 'turbo' || value === 'regular' ? value : null
+    if (this.forced === next) return
+    this.forced = next
+    if (next) {
+      this.mode = next
+      this.basis = 'manual'
+    } else {
+      this.mode = 'unknown'
+      this.basis = null
+    }
   }
 
   /** 强信号：看到 Turbo 特征就直接改判（可推翻先前误判的常规；模式一局不变，改判只在纠错）。 */
   noteTurbo(basis = 'manual') {
+    if (this.forced) return
     this.mode = 'turbo'
     this.basis = basis
   }
@@ -76,6 +99,7 @@ export class ModeInference {
     if (!Number.isFinite(gameTime) || gameTime < 0) return
     this.bountyPickups.push({ t: gameTime, v: Number.isFinite(bountyValue) ? bountyValue : null })
     if (this.bountyPickups.length > 40) this.bountyPickups.splice(0, this.bountyPickups.length - 40)
+    if (this.forced) return // 手动指定时只记账不判，尊重人的选择。
 
     if (gameTime <= BOUNTY_FIRST_WAVE_END && Number.isFinite(bountyValue)) {
       if (bountyValue >= TURBO_FIRST_WAVE_VALUE) {
@@ -96,8 +120,13 @@ export class ModeInference {
     }
   }
 
-  /** 每帧喂一次。返回当前判断（unknown 也让调用方决定怎么兜底）。 */
+  /** 每帧喂一次。返回当前判断（unknown 也让调用方决定怎么兜底）。手动指定时推断整个让路。 */
   observe(snap, clock) {
+    if (this.forced) {
+      this.mode = this.forced
+      this.basis = 'manual'
+      return this.mode
+    }
     // 万一将来 GSI 补了 game_mode，这一条优先。
     const explicit = snap?.gameModeNum
     if (explicit === TURBO_GAME_MODE) {
@@ -160,8 +189,9 @@ export class ModeInference {
     const bounty = this.creepBounty === null ? '?' : `${this.creepBounty} 金/刀`
     const firstWave = this.bountyPickups.filter((p) => p.t <= BOUNTY_FIRST_WAVE_END).map((p) => `${p.v ?? '?'}金`).join('/')
     const label = this.mode === 'turbo' ? '加速' : this.mode === 'regular' ? '常规' : '判断中'
+    const basisLabel = this.basis === 'manual' ? '手动' : this.basis
     const parts = [
-      `${label}${this.basis ? `（${this.basis}）` : ''}`,
+      `${label}${basisLabel ? `（${basisLabel}）` : ''}`,
       `符文 ${this.bountyPickups.length} 次${firstWave ? `（首波 ${firstWave}）` : ''}`,
       `XPM ${xpm}`,
       `被动金钱 ${rate}`,

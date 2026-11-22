@@ -91,3 +91,26 @@ test('将来 GSI 补了 game_mode 就走字段，优先于推断', () => {
   const regular = new ModeInference()
   assert.equal(regular.observe(snap({ gameModeNum: 22, xpm: 550 }), 450), 'regular')
 })
+
+test('手动指定优先于一切：面板设置/Coo 的 dota_mode 是最终拍板', () => {
+  const mode = new ModeInference()
+  mode.setForced('turbo')
+  assert.equal(mode.mode, 'turbo')
+  assert.equal(mode.basis, 'manual')
+  // 推断信号（赏金符/XPM/肉山）都改不了手动选择。
+  mode.noteBountyPickup(15, 40)
+  mode.observe(snap({ xpm: 550 }), 450)
+  assert.equal(mode.mode, 'turbo')
+
+  // 设回 auto：清掉手动，重新推断。
+  mode.setForced(null)
+  assert.equal(mode.mode, 'unknown')
+  mode.observe(snap({ xpm: 550 }), 450)
+  assert.equal(mode.mode, 'regular')
+
+  // reset 不清手动（换局后手选继续有效），重设才换。
+  mode.setForced('regular')
+  mode.reset()
+  assert.equal(mode.mode, 'regular')
+  assert.equal(mode.basis, 'manual')
+})

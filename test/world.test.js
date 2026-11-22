@@ -40,9 +40,10 @@ test('定义形状符合 api 6', () => {
   assert.ok(Array.isArray(definition.describe.events))
 })
 
-test('四个工具、环境提示词、面板、配置键都对', () => {
+test('五个工具、环境提示词、面板、配置键都对', () => {
   const world = definition.create(makeCtx(35123))
-  assert.equal(world.tools().length, 4)
+  assert.equal(world.tools().length, 5)
+  assert.ok(world.tools().some((tool) => tool.name === 'dota_mode'), 'dota_mode（手动指定模式）在列')
   assert.deepEqual(world.envPromptVars(), {})
 
   const web = world.webUi('zh')

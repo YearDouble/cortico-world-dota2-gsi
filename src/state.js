@@ -21,10 +21,12 @@ const MAX_EVENT_AGE_MS = 60 * 60 * 1000
 const CARD_TTL_MS = 1000
 
 export class DotaState {
-  constructor({ names = null, rawKeys = false, now = () => Date.now() } = {}) {
+  constructor({ names = null, rawKeys = false, now = () => Date.now(), cfg = null } = {}) {
     this.names = names
     this.rawKeys = rawKeys
     this.now = now
+    /** 宿主配置的活引用（worlds.dota2-gsi），timings/mode 的设置覆盖都从这里读。 */
+    this.cfg = cfg
     this.snapshot = null
     this.prev = null
     this.received = 0
@@ -151,6 +153,8 @@ export class DotaState {
     // 肉山本体在 20:00 前露头是 Turbo 的铁证。判定结果（含改判）每局写一条日志。
     const modeBefore = this.mode.mode
     const basisBefore = this.mode.basis
+    // 手动模式（面板设置 / dota_mode 工具）优先于一切推断；每帧同步，改了立即生效。
+    this.applyModeConfig()
     this.mode.observe(next, clockSec)
     const roshSeen = this.tracker.roshanLastSeen
     if (roshSeen && roshSeen.clock < ROSH_FIRST_SPAWN.regular) this.mode.noteTurbo('roshan')
@@ -216,6 +220,7 @@ export class DotaState {
     // 模式判定/改判都要落一条日志——赏金符拾取在 records 之后才进来，所以这条放帧末。
     if (modeBefore !== this.mode.mode || basisBefore !== this.mode.basis) {
       const label = this.mode.mode === 'turbo' ? '加速' : this.mode.mode === 'regular' ? '常规' : '判断中'
+      const basisLabel = this.mode.basis === 'manual' ? '手动指定' : this.mode.basis
       const evidence =
         this.mode.basis === 'bounty' && this.mode.bountyPickups.length > 0
           ? `赏金符 ${this.mode.bountyPickups.map((p) => `${p.t}s/${p.v}金`).join('、')}`
@@ -225,7 +230,7 @@ export class DotaState {
               ? `补刀单价 ${this.mode.creepBounty} 金/刀`
               : this.mode.basis === 'income' && this.mode.incomeRate !== null
                 ? `被动金钱 ${this.mode.incomeRate} 金/秒`
-                : this.mode.basis
+                : basisLabel
       this.modeNote = `对局模式判定：${label}（${evidence}）`
     }
     return events
@@ -233,8 +238,19 @@ export class DotaState {
 
   /** 设置组 timings.*：逐条覆盖默认时刻（秒，0=关）。缺了就用源码默认表，合法性 prompts.tick 里验。 */
   timingsConfig() {
-    const timings = this.ctx?.cfg?.timings
+    const timings = this.cfg?.timings
     return timings && typeof timings === 'object' ? timings : null
+  }
+
+  /** 设置组 mode.force：auto（默认，走推断）/ regular / turbo（手动指定，Coo 也能用 dota_mode 改）。 */
+  modeConfig() {
+    const mode = this.cfg?.mode
+    return mode && typeof mode === 'object' ? mode : null
+  }
+
+  /** 把设置里的手动模式同步进推断器（幂等，每帧调都安全）。 */
+  applyModeConfig() {
+    this.mode.setForced(this.modeConfig()?.force ?? null)
   }
 
   lineupEvent(snap, clockSec) {

@@ -15,13 +15,60 @@ function feed(state, list) {
   for (const frame of list) state.ingest(frame, Date.now())
 }
 
-test('四个工具，名字和只读标签都对', () => {
+test('五个工具，名字和只读标签都对', () => {
   const tools = createTools(new DotaState())
   assert.deepEqual(
     tools.map((tool) => tool.name),
-    ['dota_status', 'dota_events', 'dota_match', 'dota_minimap'],
+    ['dota_status', 'dota_events', 'dota_match', 'dota_minimap', 'dota_mode'],
   )
   for (const tool of tools) assert.deepEqual(tool.tags, ['read'])
+})
+
+test('dota_mode：只查、手动设、设回 auto，都写进设置（Coo 也能改的通道）', async () => {
+  const saved = []
+  const state = new DotaState({ cfg: { mode: { force: 'auto' } } })
+  const tools = new Map(
+    createTools(state, {
+      timezone: 'Asia/Shanghai',
+      persist: (patch) => {
+        // 和宿主 persist 的深合并语义一致（数组整体替换、对象深合并）。
+        for (const [key, value] of Object.entries(patch)) {
+          if (typeof value === 'object' && value !== null && typeof saved[key] === 'object' && saved[key] !== null) {
+            saved[key] = { ...saved[key], ...value }
+          } else {
+            saved[key] = value
+          }
+        }
+      },
+    }).map((tool) => [tool.name, tool]),
+  )
+  const mode = tools.get('dota_mode')
+
+  // 只查不改：不写设置。
+  const query = await mode.handler({})
+  assert.match(query, /^\[ok\] 当前模式/)
+  assert.equal(saved.mode, undefined, '查询不该动设置')
+
+  // Coo/用户设成加速：立即生效 + 写进设置。
+  const set = await mode.handler({ mode: 'turbo' })
+  assert.match(set, /模式已设为「加速」/)
+  assert.equal(state.mode.mode, 'turbo')
+  assert.equal(state.mode.basis, 'manual')
+  assert.deepEqual(saved.mode?.force, 'turbo')
+
+  // 手动优先：推断信号不再改判。
+  state.mode.observe({ player: { xpm: 550 } }, 450)
+  assert.equal(state.mode.mode, 'turbo')
+
+  // 设回 auto：恢复推断（unknown，等证据）。
+  const back = await mode.handler({ mode: 'auto' })
+  assert.match(back, /恢复推断/)
+  assert.equal(state.mode.mode, 'unknown')
+  assert.deepEqual(saved.mode?.force, 'auto')
+
+  // 非法值拒绝。
+  const bad = await mode.handler({ mode: 'fastest' })
+  assert.match(bad, /^\[fail\]/)
 })
 
 test('dota_minimap 没数据时说清楚，有位置库时给名单', async () => {

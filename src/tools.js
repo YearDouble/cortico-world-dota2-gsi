@@ -1,4 +1,4 @@
-/** 四个只读工具。名字、说明、参数来自 declarations.js，这里只挂处理函数。 */
+/** 五个工具：四个只读 + dota_mode（手动指定模式）。名字、说明、参数来自 declarations.js。 */
 import { renderMatchRecord } from './card.js'
 import { TOOL_DECLS } from './declarations.js'
 
@@ -11,7 +11,7 @@ function clampInt(value, min, max, fallback) {
 }
 
 export function createTools(state, options = {}) {
-  const { timezone = 'Asia/Shanghai' } = options
+  const { timezone = 'Asia/Shanghai', persist = null } = options
 
   const handlers = {
     async dota_status() {
@@ -54,6 +54,23 @@ export function createTools(state, options = {}) {
 
     async dota_minimap() {
       return state.minimapReceipt()
+    },
+
+    async dota_mode(args) {
+      const value = args?.mode
+      if (value === undefined || value === null || value === '') {
+        const label = state.mode.mode === 'turbo' ? '加速' : state.mode.mode === 'regular' ? '常规' : '判断中（按常规时刻表兜底）'
+        const basis = state.mode.basis === 'manual' ? '手动指定' : state.mode.basis ?? '还在推断'
+        return `[ok] 当前模式：${label}（${basis}）。${state.mode.debugText()}`
+      }
+      if (!['auto', 'regular', 'turbo'].includes(value)) {
+        return `[fail] mode 只能是 auto/regular/turbo，收到的是 ${value}。`
+      }
+      if (persist) persist({ mode: { force: value } })
+      // 直接拍上去，不等设置对象回读（宿主的 cfg 是活引用，这里两条路都通）。
+      state.mode.setForced(value === 'auto' ? null : value)
+      const label = value === 'turbo' ? '加速' : value === 'regular' ? '常规' : '自动（恢复推断）'
+      return `[ok] 模式已设为「${label}」，本局立即生效，设置里也存了（重启不变）。要回到自动判断，说一声或设回 auto。`
     },
   }
 
