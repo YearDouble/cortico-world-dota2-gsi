@@ -120,9 +120,10 @@ export class ModeInference {
   }
 
   debugText() {
+    // 不带「模式」两个字：状态灯和调试行都会自己加前缀，别重复。
     const rate = this.incomeRate === null ? '?' : `${this.incomeRate} 金/秒`
     const bounty = this.creepBounty === null ? '?' : `${this.creepBounty} 金/刀`
     const label = this.mode === 'turbo' ? '加速' : this.mode === 'regular' ? '常规' : '判断中'
-    return `模式 ${label}${this.basis ? `（${this.basis}）` : ''} · 被动金钱 ${rate} · 补刀单价 ${bounty}`
+    return `${label}${this.basis ? `（${this.basis}）` : ''} · 被动金钱 ${rate} · 补刀单价 ${bounty}`
   }
 }
