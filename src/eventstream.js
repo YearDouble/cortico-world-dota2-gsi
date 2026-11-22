@@ -25,7 +25,6 @@ const NOISE = new Set([
   'CHAT_MESSAGE_OBSERVER_WARD_KILLED',
   'CHAT_MESSAGE_SENTRY_WARD_KILLED',
   'CHAT_MESSAGE_DISCONNECT',
-  'bounty_rune_pickup',
   'chat_message',
 ])
 
@@ -178,6 +177,19 @@ export class EventStream {
         gameTime: num(raw.game_time),
         playerId: num(raw.player_id),
         snatched: raw.snatched === true,
+      }
+    }
+    if (raw.event_type === 'bounty_rune_pickup') {
+      // 赏金符拾取：全局事件，双方都有（2026-11-15 归档 337 条实锤）。
+      // 用途=模式推断（常规 4 分钟一波、每波 2 个；加速局 2 分钟一波）——见 mode.js。
+      return {
+        kind: 'bountyPickup',
+        key: `n|bounty|${num(raw.game_time)}|${num(raw.player_id)}|${num(raw.bounty_value)}`,
+        time: null,
+        gameTime: num(raw.game_time),
+        playerId: num(raw.player_id),
+        team: raw.team === 'radiant' ? 'radiant' : raw.team === 'dire' ? 'dire' : null,
+        bountyValue: num(raw.bounty_value),
       }
     }
     return null

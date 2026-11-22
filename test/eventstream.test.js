@@ -52,7 +52,6 @@ test('噪声类型直接丢弃', () => {
     generic({ type: 'CHAT_MESSAGE_RANDOM', value: 4, playerid1: 26, time: 1 }),
     generic({ type: 'CHAT_MESSAGE_NO_BATTLE_POINTS', value: 1, playerid1: -1, time: 1 }),
     { event_type: 'chat_message', game_time: 90, player_id: 0, channel_type: 12, message: '-gold 100000' },
-    { event_type: 'bounty_rune_pickup', game_time: 610, player_id: 2, team: 'radiant', bounty_value: 46 },
   ])
   assert.equal(out.length, 0)
 })
@@ -90,4 +89,20 @@ test('塔击杀：value=击杀方（真机 12 起配对实锤），tier 在 valu
   assert.equal(tower.killerTeam, 'radiant')
   assert.equal(tower.tier, 1)
   assert.equal(tower.killerId, -1)
+})
+
+test('赏金符拾取入流：金额和双方队伍都保留（模式推断的数据源，year 2026-11-22 提议）', () => {
+  const stream = new EventStream()
+  const rec = stream.ingest(
+    [{ event_type: 'bounty_rune_pickup', game_time: 15, player_id: 3, team: 'dire', bounty_value: 80 }],
+    -138,
+  )[0]
+  assert.equal(rec.kind, 'bountyPickup')
+  assert.equal(rec.gameTime, 15)
+  assert.equal(rec.bountyValue, 80)
+  assert.equal(rec.team, 'dire')
+  assert.equal(stream.ingest(
+    [{ event_type: 'bounty_rune_pickup', game_time: 15, player_id: 3, team: 'dire', bounty_value: 80 }],
+    -138,
+  ).length, 0, '滚动窗口里的重复事件要被去重')
 })

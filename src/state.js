@@ -154,18 +154,6 @@ export class DotaState {
     this.mode.observe(next, clockSec)
     const roshSeen = this.tracker.roshanLastSeen
     if (roshSeen && roshSeen.clock < ROSH_FIRST_SPAWN.regular) this.mode.noteTurbo('roshan')
-    if (modeBefore !== this.mode.mode || basisBefore !== this.mode.basis) {
-      const label = this.mode.mode === 'turbo' ? '加速' : this.mode.mode === 'regular' ? '常规' : '判断中'
-      const evidence =
-        this.mode.basis === 'xpm' && this.mode.xpm !== null
-          ? `XPM ${this.mode.xpm}`
-          : this.mode.basis === 'creep' && this.mode.creepBounty !== null
-            ? `补刀单价 ${this.mode.creepBounty} 金/刀`
-            : this.mode.basis === 'income' && this.mode.incomeRate !== null
-              ? `被动金钱 ${this.mode.incomeRate} 金/秒`
-              : this.mode.basis
-      this.modeNote = `对局模式判定：${label}（${evidence}）`
-    }
     // 幻影清扫要在名单确认（lineup）之前做，免得选人残留写进阵容事件。
     if (next.phase === 'playing' && !this.preGameSwept) {
       this.preGameSwept = true
@@ -197,6 +185,11 @@ export class DotaState {
       }
     }
 
+    // 赏金符拾取喂给模式推断（金额+节奏，见 mode.js）。放在 records 出来之后。
+    for (const record of records) {
+      if (record.kind === 'bountyPickup') this.mode.noteBountyPickup(record.gameTime, record.bountyValue)
+    }
+
     events.push(
       ...this.fights.update({
         clock: clockSec,
@@ -220,6 +213,21 @@ export class DotaState {
         mode: this.mode.mode,
       }),
     )
+    // 模式判定/改判都要落一条日志——赏金符拾取在 records 之后才进来，所以这条放帧末。
+    if (modeBefore !== this.mode.mode || basisBefore !== this.mode.basis) {
+      const label = this.mode.mode === 'turbo' ? '加速' : this.mode.mode === 'regular' ? '常规' : '判断中'
+      const evidence =
+        this.mode.basis === 'bounty' && this.mode.bountyPickups.length > 0
+          ? `赏金符 ${this.mode.bountyPickups.map((p) => `${p.t}s/${p.v}金`).join('、')}`
+          : this.mode.basis === 'xpm' && this.mode.xpm !== null
+            ? `XPM ${this.mode.xpm}`
+            : this.mode.basis === 'creep' && this.mode.creepBounty !== null
+              ? `补刀单价 ${this.mode.creepBounty} 金/刀`
+              : this.mode.basis === 'income' && this.mode.incomeRate !== null
+                ? `被动金钱 ${this.mode.incomeRate} 金/秒`
+                : this.mode.basis
+      this.modeNote = `对局模式判定：${label}（${evidence}）`
+    }
     return events
   }
 
