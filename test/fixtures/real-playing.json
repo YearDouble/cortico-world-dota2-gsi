@@ -1,0 +1,353 @@
+{
+  "provider": {
+    "name": "Dota 2",
+    "appid": 570,
+    "version": 48,
+    "timestamp": 1794580616
+  },
+  "map": {
+    "name": "start",
+    "matchid": "0000000000",
+    "game_time": 692,
+    "clock_time": 577,
+    "daytime": false,
+    "nightstalker_night": false,
+    "radiant_score": 1,
+    "dire_score": 4,
+    "game_state": "DOTA_GAMERULES_STATE_GAME_IN_PROGRESS",
+    "paused": false,
+    "win_team": "none",
+    "customgamename": "",
+    "ward_purchase_cooldown": 0
+  },
+  "player": {
+    "steamid": "76561190000000000",
+    "accountid": "0",
+    "name": "year",
+    "activity": "playing",
+    "kills": 1,
+    "deaths": 0,
+    "assists": 0,
+    "last_hits": 7,
+    "denies": 1,
+    "kill_streak": 1,
+    "commands_issued": 879,
+    "kill_list": {
+      "victimid_5": 1
+    },
+    "team_name": "radiant",
+    "player_slot": 0,
+    "team_slot": 0,
+    "gold": 1558,
+    "gold_reliable": 1048,
+    "gold_unreliable": 510,
+    "gold_from_hero_kills": 708,
+    "gold_from_creep_kills": 648,
+    "gold_from_summon_kills": 0,
+    "gold_from_income": 1734,
+    "gold_from_shared": 197,
+    "gpm": 494,
+    "xpm": 471
+  },
+  "hero": {
+    "facet": 0,
+    "xpos": 1827,
+    "ypos": -6391,
+    "id": 14,
+    "name": "npc_dota_hero_pudge",
+    "level": 8,
+    "xp": 4538,
+    "alive": true,
+    "respawn_seconds": 0,
+    "buyback_cost": 1172,
+    "buyback_cooldown": 0,
+    "health": 1271,
+    "max_health": 1816,
+    "health_percent": 69,
+    "mana": 362,
+    "max_mana": 507,
+    "mana_percent": 71,
+    "silenced": false,
+    "stunned": true,
+    "disarmed": false,
+    "magicimmune": false,
+    "hexed": false,
+    "muted": false,
+    "break": false,
+    "aghanims_scepter": false,
+    "aghanims_shard": false,
+    "smoked": false,
+    "permanent_buffs": {
+      "modifier_pudge_innate_graft_flesh": {
+        "stack_count": 1
+      }
+    },
+    "has_debuff": true,
+    "talent_1": false,
+    "talent_2": false,
+    "talent_3": false,
+    "talent_4": false,
+    "talent_5": false,
+    "talent_6": false,
+    "talent_7": false,
+    "talent_8": false,
+    "attributes_level": 0
+  },
+  "abilities": {
+    "ability0": {
+      "name": "pudge_meat_hook",
+      "level": 4,
+      "can_cast": true,
+      "passive": false,
+      "ability_active": true,
+      "cooldown": 0,
+      "max_cooldown": 15,
+      "ultimate": false
+    },
+    "ability1": {
+      "name": "pudge_rot",
+      "level": 2,
+      "can_cast": true,
+      "passive": false,
+      "ability_active": true,
+      "cooldown": 0,
+      "max_cooldown": 0,
+      "ultimate": false
+    },
+    "ability2": {
+      "name": "pudge_flesh_heap",
+      "level": 1,
+      "can_cast": false,
+      "passive": false,
+      "ability_active": true,
+      "cooldown": 10,
+      "max_cooldown": 21,
+      "ultimate": false
+    },
+    "ability3": {
+      "name": "pudge_dismember",
+      "level": 1,
+      "can_cast": false,
+      "passive": false,
+      "ability_active": true,
+      "cooldown": 21,
+      "max_cooldown": 31,
+      "ultimate": true
+    },
+    "ability4": {
+      "name": "plus_high_five",
+      "level": 1,
+      "can_cast": true,
+      "passive": false,
+      "ability_active": true,
+      "cooldown": 0,
+      "max_cooldown": 0,
+      "ultimate": false
+    },
+    "ability5": {
+      "name": "plus_guild_banner",
+      "level": 1,
+      "can_cast": true,
+      "passive": false,
+      "ability_active": true,
+      "cooldown": 0,
+      "max_cooldown": 0,
+      "ultimate": false
+    },
+    "ability6": {
+      "name": "seasonal_dark_carnival_balloon",
+      "level": 1,
+      "can_cast": true,
+      "passive": false,
+      "ability_active": true,
+      "cooldown": 0,
+      "max_cooldown": 0,
+      "ultimate": false,
+      "charges": 5,
+      "max_charges": 5,
+      "charge_cooldown": 0
+    }
+  },
+  "items": {
+    "slot0": {
+      "name": "item_phase_boots",
+      "purchaser": 0,
+      "item_level": 1,
+      "can_cast": true,
+      "cooldown": 0,
+      "max_cooldown": 9,
+      "passive": false
+    },
+    "slot1": {
+      "name": "item_bracer",
+      "purchaser": 0,
+      "item_level": 1,
+      "passive": true
+    },
+    "slot2": {
+      "name": "item_bracer",
+      "purchaser": 0,
+      "item_level": 1,
+      "passive": true
+    },
+    "slot3": {
+      "name": "item_bracer",
+      "purchaser": 0,
+      "item_level": 1,
+      "passive": true
+    },
+    "slot4": {
+      "name": "item_bracer",
+      "purchaser": 0,
+      "item_level": 1,
+      "passive": true
+    },
+    "slot5": {
+      "name": "empty"
+    },
+    "slot6": {
+      "name": "empty"
+    },
+    "slot7": {
+      "name": "empty"
+    },
+    "slot8": {
+      "name": "empty"
+    },
+    "stash0": {
+      "name": "empty"
+    },
+    "stash1": {
+      "name": "empty"
+    },
+    "stash2": {
+      "name": "empty"
+    },
+    "stash3": {
+      "name": "empty"
+    },
+    "stash4": {
+      "name": "empty"
+    },
+    "stash5": {
+      "name": "empty"
+    },
+    "teleport0": {
+      "name": "item_tpscroll",
+      "purchaser": 0,
+      "item_level": 1,
+      "can_cast": true,
+      "cooldown": 0,
+      "max_cooldown": 61,
+      "passive": false,
+      "item_charges": 1,
+      "charges": 1
+    },
+    "neutral0": {
+      "name": "empty"
+    },
+    "neutral1": {
+      "name": "empty"
+    },
+    "preserved_neutral6": {
+      "name": "empty"
+    },
+    "preserved_neutral7": {
+      "name": "empty"
+    },
+    "preserved_neutral8": {
+      "name": "empty"
+    },
+    "preserved_neutral9": {
+      "name": "empty"
+    },
+    "preserved_neutral10": {
+      "name": "empty"
+    }
+  },
+  "draft": {},
+  "buildings": {
+    "radiant": {
+      "dota_goodguys_tower2_top": {
+        "health": 607,
+        "max_health": 2500
+      },
+      "dota_goodguys_tower3_top": {
+        "health": 2500,
+        "max_health": 2500
+      },
+      "dota_goodguys_tower2_mid": {
+        "health": 2043,
+        "max_health": 2500
+      },
+      "dota_goodguys_tower3_mid": {
+        "health": 2500,
+        "max_health": 2500
+      },
+      "dota_goodguys_tower3_bot": {
+        "health": 2500,
+        "max_health": 2500
+      },
+      "dota_goodguys_tower4_top": {
+        "health": 2600,
+        "max_health": 2600
+      },
+      "dota_goodguys_tower4_bot": {
+        "health": 2600,
+        "max_health": 2600
+      },
+      "good_rax_melee_top": {
+        "health": 2200,
+        "max_health": 2200
+      },
+      "good_rax_range_top": {
+        "health": 1300,
+        "max_health": 1300
+      },
+      "good_rax_melee_mid": {
+        "health": 2200,
+        "max_health": 2200
+      },
+      "good_rax_range_mid": {
+        "health": 1300,
+        "max_health": 1300
+      },
+      "good_rax_melee_bot": {
+        "health": 2200,
+        "max_health": 2200
+      },
+      "good_rax_range_bot": {
+        "health": 1300,
+        "max_health": 1300
+      },
+      "dota_goodguys_fort": {
+        "health": 4500,
+        "max_health": 4500
+      }
+    }
+  },
+  "previously": {
+    "player": {
+      "gold": 1556,
+      "gold_reliable": 1046,
+      "gold_from_income": 1732
+    },
+    "hero": {
+      "health": 1281,
+      "health_percent": 70,
+      "mana": 361
+    },
+    "abilities": {
+      "ability3": {
+        "cooldown": 22
+      }
+    },
+    "buildings": {
+      "radiant": {
+        "dota_goodguys_tower2_top": {
+          "health": 628
+        }
+      }
+    }
+  }
+}
