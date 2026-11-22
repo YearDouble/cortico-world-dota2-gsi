@@ -110,6 +110,8 @@ export class MinimapTracker {
      * 只在「看得到」时更新：没看到不等于死了（坑里没视野），所以 absence 不参与判死。
      */
     this.roshanLastSeen = null
+    /** 首个 playing 帧的时钟。幻影清扫的分界线：进游戏后没再露头的都是选人残留。 */
+    this.playingStartClock = null
     this.selfKey = null
     this.selfTeam = null
     this.lastClock = null
@@ -120,6 +122,11 @@ export class MinimapTracker {
   ingest(payload, clock, snap = null) {
     this.appearances = []
     if (clock === null || clock === undefined) return
+    // 选人阶段的时钟可能是正的（2026-11-22 加速 bot 局：选人时 0:24 起）——
+    // 幻影清扫不能用「负时钟」当分界，改用「进游戏那一刻」。
+    if (this.playingStartClock === null && snap?.phase === 'playing' && Number.isFinite(clock)) {
+      this.playingStartClock = clock
+    }
     const map = payload?.minimap
     if (!map || typeof map !== 'object') return
 
@@ -247,20 +254,34 @@ export class MinimapTracker {
   }
 
   /**
-   * 开局清扫幻影（2026-11-15 真机 bot 局发现）：选人阶段 bot 换英雄、敌我队色未定，
-   * 会留下「再也没出现过」的幻影（如剑圣后来没进名单）。进 playing 第一帧把只在
-   * 负时钟（选人/策略期）出现过的英雄扫掉——真人会立刻重新进图自动补回，无伤。
-   * 返回扫掉几个，调试看。
+   * 开局清扫幻影（2026-11-15 真机 bot 局发现；2026-11-22 加强）：选人阶段 bot 换英雄、
+   * 敌我队色未定，会留下「再也没出现过」的幻影。分界线用「进游戏那一刻的时钟」——
+   * 加速局选人时钟是正的（0:24 起），旧的「只清负时钟」扫不到（2026-11-22 加速局敌方
+   * 名单出了 7 个）。进游戏后没再露头的都是残留，真人本来就在这帧的报文里。返回扫掉几个。
    */
   sweepPreGamePhantoms(clockSec) {
     let removed = 0
+    const cutoff = this.playingStartClock ?? 0
     for (const [unitname, hero] of this.heroes) {
-      if (hero.lastSeen < 0) {
+      if (hero.lastSeen < cutoff) {
         this.heroes.delete(unitname)
         removed += 1
       }
     }
     return removed
+  }
+
+  /** 队伍名单最多 max 个：多出来的按「最久没露头」当幻影剔掉（一边不可能超过 5 个人）。 */
+  teamRoster(team, max) {
+    const list = this.heroesOf(team)
+    if (list.length <= max) return list
+    return [...list].sort((a, b) => b.lastSeen - a.lastSeen).slice(0, max)
+  }
+
+  /** 敌方名单（封顶 5 个，最新的优先）。 */
+  enemyRoster() {
+    const enemy = this.enemyTeam()
+    return enemy ? this.teamRoster(enemy, 5) : []
   }
 
   /** 某个队的英雄名单（按发现顺序）。 */
@@ -280,12 +301,11 @@ export class MinimapTracker {
 
   /** 敌方名单确认到几个。strategy 阶段就陆续进报文，落线 30 秒内应该齐 5 个。 */
   enemyRosterCount() {
-    const enemy = this.enemyTeam()
-    return enemy ? this.heroesOf(enemy).length : 0
+    return this.enemyRoster().length
   }
 
   rosterComplete() {
-    return this.enemyRosterCount() >= 5
+    return this.enemyRoster().length >= 5
   }
 
   /** 敌方当前可见的（lastSeen 在 fresh 窗口内），带区域。 */

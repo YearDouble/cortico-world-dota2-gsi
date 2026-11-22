@@ -186,7 +186,10 @@ export class FightEngine {
         idmap?.associateVictim(record, tracker)
         this.admitKill(record, now)
         if (record.fb && record.killerId !== null && record.killerId === idmap?.selfId) {
-          push('dota.player.killed', `${stamp(now)} 你拿了一血。`)
+          // 一血归属也要过 kill_list 的地面真值：报错了她会在队友面前说错话。
+          if (this.selfKillConfirmed(record.victimId, snap)) {
+            push('dota.player.killed', `${stamp(now)} 你拿了一血。`)
+          }
         }
       } else if (record.kind === 'buyback') {
         if (idmap && record.playerId === idmap.selfId) {
@@ -228,10 +231,22 @@ export class FightEngine {
 
     // 团战收口。
     if (this.window.length >= FIGHT_MIN_KILLS && this.lastKillTime !== null && now - this.lastKillTime >= FIGHT_QUIET) {
-      this.emitFight(push, now, idmap, showName, selfTeam)
+      this.emitFight(push, now, idmap, showName, selfTeam, snap)
     }
 
     return events
+  }
+
+  /**
+   * 「你击杀了 X」的地面真值：GSI player.kill_list（victimid_<id> → 次数）。
+   * kill_list 没到（字段缺失）就不拦，到了但对不上就拦——宁可少说一句，不说错的。
+   * （2026-11-22 Coo 反馈：「你击杀了混沌骑士」年说没动过手，id 映射的归属不可全信。）
+   */
+  selfKillConfirmed(victimId, snap) {
+    const killList = snap?.player?.killList
+    if (!killList) return true
+    const count = killList[victimId]
+    return Number.isFinite(count) && count >= 1
   }
 
   admitKill(record, now) {
@@ -250,7 +265,7 @@ export class FightEngine {
     this.lastKillTime = record.time ?? now
   }
 
-  emitFight(push, now, idmap, showName, selfTeam) {
+  emitFight(push, now, idmap, showName, selfTeam, snap = null) {
     const kills = this.window
     this.window = []
     this.lastKillTime = null
@@ -267,10 +282,13 @@ export class FightEngine {
     }
 
     const selfDied = ourDead.some((kill) => kill.victimId === selfId)
-    const parts = [`团战结束：${theirDead.length} 换 ${ourDead.length}${selfDied ? '' : '，你没死'}。`]
+    // 方向写死在句子里（2026-11-22 Coo 反馈：「3 换 0」她读反了）——不说 X 换 Y，说谁倒了。
+    const parts = [`团战收口：敌方倒下 ${theirDead.length} 人，我方阵亡 ${ourDead.length} 人${selfDied ? '，你也倒了' : '，你没死'}。`]
 
+    const killList = snap?.player?.killList ?? null
     const selfKills = kills
       .filter((kill) => kill.killerId !== null && kill.killerId === selfId)
+      .filter((kill) => this.selfKillConfirmed(kill.victimId, snap))
       .map((kill) => {
         const victimKey = idmapOrNull?.name(kill.victimId)
         return victimKey ? showName(victimKey) : null
@@ -454,7 +472,7 @@ export class FightEngine {
   }
 
   /** 对局收尾时把还开着口的团战窗口收掉。 */
-  flush(now, idmap, showName, selfTeam) {
+  flush(now, idmap, showName, selfTeam, snap = null) {
     const events = []
     if (this.window.length >= FIGHT_MIN_KILLS) {
       // 注意：emitFight 的 push 是 (type, text) 两个参数——这里必须收齐两个再组对象。
@@ -467,6 +485,7 @@ export class FightEngine {
         idmap,
         showName,
         selfTeam,
+        snap,
       )
     }
     return events

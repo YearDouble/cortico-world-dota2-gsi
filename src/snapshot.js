@@ -94,6 +94,22 @@ function parseBuildings(buildings) {
   return out
 }
 
+/**
+ * kill_list 是 `{"victimid_<playerid>": 次数}`——「我亲手杀过谁」的地面真值。
+ * 用来把关「你击杀了 X」这类归属判断（2026-11-22 Coo 反馈：归属可能错）。
+ */
+function parseKillList(killList) {
+  if (!killList || typeof killList !== 'object') return null
+  const out = {}
+  for (const [key, value] of Object.entries(killList)) {
+    const match = /^victimid_(\d+)$/.exec(key)
+    if (!match) continue
+    const count = num(value)
+    if (count !== null) out[Number(match[1])] = count
+  }
+  return out
+}
+
 export function normalize(payload) {
   const map = payload?.map ?? null
   const hero = payload?.hero ?? null
@@ -175,6 +191,7 @@ export function normalize(payload) {
           // 被动金钱累计：推断常规/Turbo 用的信号（GSI 不发 game_mode，见 mode.js）。
           goldFromIncome: num(player.gold_from_income),
           goldFromCreepKills: num(player.gold_from_creep_kills),
+          killList: parseKillList(player.kill_list),
         }
       : null,
     items: parseItems(payload?.items),

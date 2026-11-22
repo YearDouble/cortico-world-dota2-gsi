@@ -195,3 +195,60 @@ test('面板调试文本能生成', () => {
   assert.match(text, /事件流: /)
   assert.match(text, /id 映射: /)
 })
+
+test('加速局选人时钟是正的：幻影照样扫掉（2026-11-22 Coo 反馈）', () => {
+  const state = new DotaState()
+  const frame = (clockSec, entries, phase) => ({
+    provider: { appid: 570 },
+    map: { game_state: phase, clock_time: clockSec, game_time: Math.max(0, clockSec), matchid: 'turbo1' },
+    hero: { name: 'npc_dota_hero_axe', id: 2, level: 1, alive: true, xpos: -6000, ypos: -6000 },
+    player: { team_name: 'radiant', team_slot: 0 },
+    minimap: Object.fromEntries(entries.map((entry, i) => [
+      `o${i}`,
+      {
+        xpos: entry.x,
+        ypos: entry.y,
+        image: entry.self ? 'minimap_herocircle_self' : entry.enemy ? 'minimap_enemyicon' : 'minimap_herocircle',
+        team: entry.team ?? 2,
+        yaw: 0,
+        unitname: entry.unit,
+        visionrange: 1800,
+      },
+    ])),
+  })
+  const self = { unit: 'npc_dota_hero_axe', x: -6000, y: -6000, self: true }
+  const realAllies = [1, 2, 3, 4].map((i) => ({ unit: `npc_dota_hero_ally${i}`, x: -5000 + i * 100, y: -5000 }))
+  const realEnemies = [1, 2, 3, 4, 5].map((i) => ({ unit: `npc_dota_hero_foe${i}`, x: 5000 + i * 100, y: 5000, enemy: true, team: 3 }))
+
+  // 选人阶段时钟 0:24（加速局是正的），bot 换英雄留下幻影长矛手。
+  state.ingest(frame(24, [self, { unit: 'npc_dota_hero_phantom_lancer', x: -5200, y: -5300 }, ...realAllies], 'DOTA_GAMERULES_STATE_HERO_SELECTION'), 1000)
+  // 进游戏（时钟 40）：幻影不再出现，真人重新进图。
+  const fresh = state.ingest(frame(40, [{ ...self }, ...realAllies, ...realEnemies], 'DOTA_GAMERULES_STATE_GAME_IN_PROGRESS'), 2000)
+  const names = state.tracker.heroesOf('radiant').map((hero) => hero.short)
+  assert.ok(!names.includes('phantom_lancer'), '正向时钟选人期的幻影也要被扫掉')
+  const lineup = fresh.events.find((event) => event.type === 'dota.match.lineup')
+  assert.ok(lineup, '名单齐了该发 lineup')
+})
+
+test('敌方名单封顶 5：多出来的残留挤进来也只报最新的五个（2026-11-22 加速局出过 7 个）', () => {
+  const state = new DotaState()
+  const self = { unit: 'npc_dota_hero_axe', x: -6000, y: -6000, self: true, team: 2 }
+  const allies = [1, 2, 3, 4].map((i) => ({ unit: `npc_dota_hero_ally${i}`, x: -5000 + i * 100, y: -5000, team: 2 }))
+  const foes = ['foe_a', 'foe_b', 'foe_c', 'foe_d', 'foe_e'].map((n, i) => ({
+    unit: `npc_dota_hero_${n}`,
+    x: 5000 + i * 100,
+    y: 5000,
+    team: 3,
+  }))
+  // 名单第一次凑齐时就带着两个残留（选人阶段见过、开局长在一帧里冒头）。
+  const residuals = [
+    { unit: 'npc_dota_hero_residual_f', x: 5600, y: 5000, team: 3 },
+    { unit: 'npc_dota_hero_residual_g', x: 5700, y: 5000, team: 3 },
+  ]
+  const next = state.ingest(heroFrame(80, [self, ...allies, ...foes, ...residuals], 'roster1'), 2000)
+  const lineup = next.events.find((event) => event.type === 'dota.match.lineup')
+  assert.ok(lineup, '名单齐了该发 lineup')
+  const listed = lineup.text.split('敌方 ')[1] ?? ''
+  assert.equal(listed.replace(/。$/, '').split('/').length, 5, '敌方只报五个')
+  assert.ok(!/residual/.test(lineup.text), '最久没露头的残留不进名单')
+})

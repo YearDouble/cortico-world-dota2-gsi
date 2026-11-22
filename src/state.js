@@ -140,26 +140,30 @@ export class DotaState {
     // 终局：把还开着口的团战先收掉，让 fight.ended 和 match.ended 一起走。
     if (next.phase === 'postgame' && prevSnap?.phase !== 'postgame' && this.fights.window.length >= 2) {
       const selfTeam = this.tracker.selfTeam ?? (next.player?.team === 'dire' ? 'dire' : 'radiant')
-      events.push(...this.fights.flush(next.clock ?? 0, this.idmap, showName, selfTeam))
+      events.push(...this.fights.flush(next.clock ?? 0, this.idmap, showName, selfTeam, next))
     }
 
     const clockSec = next.clock
     if (!next.inMatch || next.phase === 'postgame' || clockSec === null || clockSec === undefined) return events
 
     this.tracker.ingest(payload, clockSec, next)
-    // 常规/Turbo 推断：被动金钱和补刀单价先判，肉山本体在 20:00 前露头是 Turbo 的铁证。
+    // 常规/Turbo 推断：XPM 为主证据（2026-11-22 校准：加速局 XPM 1500+，常规局 600 上下），
+    // 肉山本体在 20:00 前露头是 Turbo 的铁证。判定结果（含改判）每局写一条日志。
     const modeBefore = this.mode.mode
+    const basisBefore = this.mode.basis
     this.mode.observe(next, clockSec)
     const roshSeen = this.tracker.roshanLastSeen
     if (roshSeen && roshSeen.clock < ROSH_FIRST_SPAWN.regular) this.mode.noteTurbo('roshan')
-    if (modeBefore === 'unknown' && this.mode.mode !== 'unknown') {
-      const label = this.mode.mode === 'turbo' ? '加速' : '常规'
+    if (modeBefore !== this.mode.mode || basisBefore !== this.mode.basis) {
+      const label = this.mode.mode === 'turbo' ? '加速' : this.mode.mode === 'regular' ? '常规' : '判断中'
       const evidence =
-        this.mode.basis === 'income' && this.mode.incomeRate !== null
-          ? `被动金钱 ${this.mode.incomeRate} 金/秒`
+        this.mode.basis === 'xpm' && this.mode.xpm !== null
+          ? `XPM ${this.mode.xpm}`
           : this.mode.basis === 'creep' && this.mode.creepBounty !== null
             ? `补刀单价 ${this.mode.creepBounty} 金/刀`
-            : this.mode.basis
+            : this.mode.basis === 'income' && this.mode.incomeRate !== null
+              ? `被动金钱 ${this.mode.incomeRate} 金/秒`
+              : this.mode.basis
       this.modeNote = `对局模式判定：${label}（${evidence}）`
     }
     // 幻影清扫要在名单确认（lineup）之前做，免得选人残留写进阵容事件。
@@ -228,16 +232,16 @@ export class DotaState {
   lineupEvent(snap, clockSec) {
     const tracker = this.tracker
     const selfTeam = tracker.selfTeam ?? (snap.player?.team === 'dire' ? 'dire' : 'radiant')
-    const enemyTeam = selfTeam === 'radiant' ? 'dire' : 'radiant'
     const teamLabel = selfTeam === 'radiant' ? '天辉' : '夜魇'
     const selfKey = tracker.selfKey ?? snap.hero?.key
+    // 名单封顶：敌方最多 5、己方除你之外最多 4——多出来的是选人幻影（2026-11-22 加速局出过 7 个）。
     const selfShort = selfKey ? heroName(selfKey, this.names, this.rawKeys) ?? tracker.self()?.short : null
     const allies = tracker
-      .heroesOf(selfTeam)
+      .teamRoster(selfTeam, 5)
       .filter((hero) => hero.key !== tracker.selfKey)
       .map((hero) => heroName(hero.key, this.names, this.rawKeys) ?? hero.short)
     const enemies = tracker
-      .heroesOf(enemyTeam)
+      .enemyRoster()
       .map((hero) => heroName(hero.key, this.names, this.rawKeys) ?? hero.short)
     const parts = [`[刀塔 ${clock(clockSec)}] 双方阵容就位。`]
     if (selfShort) parts.push(`你=${selfShort}（${teamLabel}），`)
@@ -395,7 +399,7 @@ export class DotaState {
     const lines = [header.join(' · ')]
 
     lines.push('己方（实时位置）:')
-    for (const hero of tracker.heroesOf(tracker.selfTeam)) {
+    for (const hero of tracker.teamRoster(tracker.selfTeam, 5)) {
       if (hero.key === tracker.selfKey) continue
       const age = clockSec - hero.lastSeen
       const label = show(hero.key)

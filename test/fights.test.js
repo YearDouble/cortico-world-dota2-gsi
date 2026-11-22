@@ -42,7 +42,7 @@ test('两人头窗口收口成一条团战，报几换几和击杀者', () => {
   const events = run(ctx, 117)
   const fight = events.find((event) => event.type === 'dota.fight.ended')
   assert.ok(fight, '应该收口')
-  assert.match(fight.text, /团战结束：2 换 0，你没死/)
+  assert.match(fight.text, /团战收口：敌方倒下 2 人，我方阵亡 0 人，你没死/)
   assert.match(fight.text, /你击杀了 viper 和 luna/)
   assert.match(fight.text, /\[刀塔 1:57\]/)
 })
@@ -60,7 +60,7 @@ test('单杀不收口，散落的击杀不算同一场', () => {
   events = run(ctx, 320)
   const fights = events.filter((event) => event.type === 'dota.fight.ended')
   assert.equal(fights.length, 1)
-  assert.match(fights[0].text, /2 换 0/)
+  assert.match(fights[0].text, /敌方倒下 2 人，我方阵亡 0 人/)
 })
 
 test('自己阵亡写进团战总结', () => {
@@ -73,7 +73,7 @@ test('自己阵亡写进团战总结', () => {
   run(ctx, 102, [kill(102, 0, 7)])
   const events = run(ctx, 117)
   const fight = events.find((event) => event.type === 'dota.fight.ended')
-  assert.match(fight.text, /1 换 1。/)
+  assert.match(fight.text, /敌方倒下 1 人，我方阵亡 1 人，你也倒了。/)
   assert.match(fight.text, /viper围殴你/)
 })
 
@@ -248,7 +248,7 @@ test('终局收口 flush 返回完整事件对象（2026-11-22 金丝雀回归�
     assert.equal(typeof event, 'object')
     assert.equal(typeof event.type, 'string')
     assert.equal(typeof event.text, 'string')
-    assert.match(event.text, /团战结束：/)
+    assert.match(event.text, /团战收口：/)
   }
 })
 
@@ -301,4 +301,31 @@ test('别人买活不报', () => {
   const buyback = { kind: 'buyback', key: 'b2', time: 400, gameTime: 400, playerId: 6 }
   const events = run(ctx, 401, [buyback])
   assert.equal(events.filter((item) => item.type === 'dota.player.buyback').length, 0)
+})
+
+test('击杀归属过 kill_list 地面真值：对不上就不说「你击杀了」（2026-11-22 Coo 反馈）', () => {
+  const ctx = setup()
+  ctx.idmap.selfId = 0
+  ctx.idmap.bind(0, 'npc_dota_hero_axe')
+  ctx.idmap.bind(7, 'npc_dota_hero_viper')
+  ctx.idmap.bind(8, 'npc_dota_hero_luna')
+  // kill_list 存在但没有 victimid_7/8：归属对不上，宁可不说。
+  run(ctx, 100, [kill(100, 7, 0)], null, 'playing', { snap: { player: { team: 'radiant', killList: {} } } })
+  run(ctx, 102, [kill(102, 8, 0)], null, 'playing', { snap: { player: { team: 'radiant', killList: {} } } })
+  let events = run(ctx, 117, [], null, 'playing', { snap: { player: { team: 'radiant', killList: {} } } })
+  const fight = events.find((event) => event.type === 'dota.fight.ended')
+  assert.ok(fight)
+  assert.doesNotMatch(fight.text, /你击杀了/)
+
+  // kill_list 确认了：才说「你击杀了」。
+  const ctx2 = setup()
+  ctx2.idmap.selfId = 0
+  ctx2.idmap.bind(0, 'npc_dota_hero_axe')
+  ctx2.idmap.bind(7, 'npc_dota_hero_viper')
+  ctx2.idmap.bind(8, 'npc_dota_hero_luna')
+  run(ctx2, 100, [kill(100, 7, 0)], null, 'playing', { snap: { player: { team: 'radiant', killList: { 7: 1, 8: 2 } } } })
+  run(ctx2, 102, [kill(102, 8, 0)], null, 'playing', { snap: { player: { team: 'radiant', killList: { 7: 1, 8: 2 } } } })
+  events = run(ctx2, 117, [], null, 'playing', { snap: { player: { team: 'radiant', killList: { 7: 1, 8: 2 } } } })
+  const fight2 = events.find((event) => event.type === 'dota.fight.ended')
+  assert.match(fight2.text, /你击杀了/)
 })
