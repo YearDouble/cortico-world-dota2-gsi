@@ -70,8 +70,11 @@ test('开局名单：敌方 5/5 确认后发一条 lineup', () => {
   const enemies = [1, 2, 3, 4, 5].map((i) => ({ unit: `npc_dota_hero_foe${i}`, x: 5000 + i * 100, y: 5000, enemy: true }))
 
   state.ingest(heroFrame(50, [self, ...allies, ...enemies.slice(0, 2)]), 1000)
+  // 名单稳定 10 秒才发（2026-11-22 翻案：凑齐就发会发出队色未定的残缺名单）。
   const full = state.ingest(heroFrame(80, fill([self, ...allies, ...enemies], 16)), 2000)
-  const lineup = full.events.filter((event) => event.type === 'dota.match.lineup')
+  assert.equal(full.events.filter((event) => event.type === 'dota.match.lineup').length, 0, '刚凑齐还不发')
+  const stable = state.ingest(heroFrame(95, fill([self, ...allies, ...enemies], 16)), 2100)
+  const lineup = stable.events.filter((event) => event.type === 'dota.match.lineup')
   assert.equal(lineup.length, 1)
   assert.match(lineup[0].text, /你=axe（天辉）/)
   assert.match(lineup[0].text, /队友 ally1\/ally2\/ally3\/ally4/)
@@ -85,15 +88,19 @@ test('开局名单：敌方 5/5 确认后发一条 lineup', () => {
 test('换 matchid 整体重置，名单重新确认', () => {
   const state = new DotaState()
   const self = { unit: 'npc_dota_hero_axe', x: -6000, y: -6000, self: true, team: 2 }
+  const allies = [1, 2, 3, 4].map((i) => ({ unit: `npc_dota_hero_ally${i}`, x: -5000 + i * 100, y: -5000, team: 2 }))
   const enemies = [1, 2, 3, 4, 5].map((i) => ({ unit: `npc_dota_hero_foe${i}`, x: 5000 + i * 100, y: 5000, enemy: true }))
-  state.ingest(heroFrame(100, fill([self, ...enemies], 16), 'm1'), 1000)
+  state.ingest(heroFrame(100, fill([self, ...allies, ...enemies], 16), 'm1'), 1000)
+  state.ingest(heroFrame(112, fill([self, ...allies, ...enemies], 16), 'm1'), 1100)
   assert.equal(state.tracker.enemyRosterCount(), 5)
   assert.equal(state.lineupEmitted, true)
 
-  const next = state.ingest(heroFrame(120, fill([self, ...enemies], 16), 'm2'), 2000)
+  const next = state.ingest(heroFrame(120, fill([self, ...allies, ...enemies], 16), 'm2'), 2000)
   assert.equal(state.matchKey, 'm2')
-  // 重置后名单重新确认，新的一局再发一条 lineup。
-  assert.equal(next.events.filter((event) => event.type === 'dota.match.lineup').length, 1)
+  assert.equal(next.events.filter((event) => event.type === 'dota.match.lineup').length, 0, '新的一局刚进来还不发')
+  // 重置后名单重新确认，稳定 10 秒再发一条 lineup。
+  const stable = state.ingest(heroFrame(133, fill([self, ...allies, ...enemies], 16), 'm2'), 2100)
+  assert.equal(stable.events.filter((event) => event.type === 'dota.match.lineup').length, 1)
 })
 
 test('自己阵亡有击杀事件对账，不记 mismatch', () => {
@@ -176,15 +183,18 @@ test('bot 局幻影清扫：选人残留不进 lineup，真人重新进图补回
   assert.equal(state.tracker.heroesOf('radiant').length, 5, '己方 5 人')
   assert.equal(state.tracker.enemyRosterCount(), 5, '敌方 5/5')
 
-  // lineup 在清扫之后才发，阵容不含幻影。
-  const lineup = fresh.events.find((event) => event.type === 'dota.match.lineup')
-  assert.ok(lineup, '名单齐了该发 lineup')
-  assert.ok(!/juggernaut|windrunner|slardar/.test(lineup.text), 'lineup 不含幻影')
-  assert.match(lineup.text, /pudge/)
+  // lineup 在清扫之后、名单稳定之后才发，阵容不含幻影（稳定帧在下面）。
+  assert.equal(fresh.events.filter((event) => event.type === 'dota.match.lineup').length, 0, '刚进游戏还不发')
 
   // 清扫一局只做一次。
   state.ingest(mk(10, [{ ...self }], 'DOTA_GAMERULES_STATE_GAME_IN_PROGRESS'), 3000)
   assert.equal(state.tracker.heroesOf('radiant').length, 5, '后续帧不再清真人（他们只是暂时在雾里）')
+  // 名单稳定 10 秒后才发 lineup（新触发规矩），幻影不在这套名单里。
+  const stableFrame = mk(16, [{ ...self }, ...realAllies, ...realEnemiesDire], 'DOTA_GAMERULES_STATE_GAME_IN_PROGRESS')
+  const stable = state.ingest(stableFrame, 3100)
+  const stableLineup = stable.events.find((event) => event.type === 'dota.match.lineup')
+  assert.ok(stableLineup, '稳定后该发 lineup')
+  assert.ok(!/juggernaut|windrunner|slardar/.test(stableLineup.text), '稳定名单同样不含幻影')
 })
 
 test('面板调试文本能生成', () => {
@@ -226,8 +236,11 @@ test('加速局选人时钟是正的：幻影照样扫掉（2026-11-22 Coo 反�
   const fresh = state.ingest(frame(40, [{ ...self }, ...realAllies, ...realEnemies], 'DOTA_GAMERULES_STATE_GAME_IN_PROGRESS'), 2000)
   const names = state.tracker.heroesOf('radiant').map((hero) => hero.short)
   assert.ok(!names.includes('phantom_lancer'), '正向时钟选人期的幻影也要被扫掉')
-  const lineup = fresh.events.find((event) => event.type === 'dota.match.lineup')
-  assert.ok(lineup, '名单齐了该发 lineup')
+  assert.equal(fresh.events.filter((event) => event.type === 'dota.match.lineup').length, 0, '刚进游戏还不发')
+  const stable = state.ingest(frame(51, [{ ...self }, ...realAllies, ...realEnemies], 'DOTA_GAMERULES_STATE_GAME_IN_PROGRESS'), 2100)
+  const lineup = stable.events.find((event) => event.type === 'dota.match.lineup')
+  assert.ok(lineup, '名单稳定后该发 lineup')
+  assert.ok(!/phantom_lancer/.test(lineup.text), 'lineup 不含幻影')
 })
 
 test('敌方名单封顶 5：多出来的残留挤进来也只报最新的五个（2026-11-22 加速局出过 7 个）', () => {
@@ -246,9 +259,35 @@ test('敌方名单封顶 5：多出来的残留挤进来也只报最新的五个
     { unit: 'npc_dota_hero_residual_g', x: 5700, y: 5000, team: 3 },
   ]
   const next = state.ingest(heroFrame(80, [self, ...allies, ...foes, ...residuals], 'roster1'), 2000)
-  const lineup = next.events.find((event) => event.type === 'dota.match.lineup')
-  assert.ok(lineup, '名单齐了该发 lineup')
+  assert.equal(next.events.filter((event) => event.type === 'dota.match.lineup').length, 0, '刚凑齐还不发')
+  const stable = state.ingest(heroFrame(95, [self, ...allies, ...foes, ...residuals], 'roster1'), 2100)
+  const lineup = stable.events.find((event) => event.type === 'dota.match.lineup')
+  assert.ok(lineup, '名单稳定后该发 lineup')
   const listed = lineup.text.split('敌方 ')[1] ?? ''
   assert.equal(listed.replace(/。$/, '').split('/').length, 5, '敌方只报五个')
   assert.ok(!/residual/.test(lineup.text), '最久没露头的残留不进名单')
+})
+
+test('名单更正：漏的人晚进视野，稳定后补一条更正（2026-11-22 宙斯案）', () => {
+  const state = new DotaState()
+  const self = { unit: 'npc_dota_hero_axe', x: -6000, y: -6000, self: true, team: 2 }
+  const allies = [1, 2, 3, 4].map((i) => ({ unit: `npc_dota_hero_ally${i}`, x: -5000 + i * 100, y: -5000, team: 2 }))
+  const foes = [1, 2, 3, 4].map((i) => ({ unit: `npc_dota_hero_foe${i}`, x: 5000 + i * 100, y: 5000, enemy: true }))
+  // 3:00 超时：敌方只见了 4 个，先发手上有的（缺宙斯）。
+  state.ingest(heroFrame(200, fill([self, ...allies, ...foes], 16), 'zeus1'), 1000)
+  assert.equal(state.lineupEmitted, true)
+  const first = state.events.map((event) => event.text).find((text) => text.includes('阵容就位'))
+  assert.ok(first && !/宙斯/.test(first), '首条名单缺宙斯（复现原案）')
+
+  // 4:10 宙斯进视野，名单变了；稳定 10 秒后补更正。
+  const withZeus = [
+    ...foes,
+    { unit: 'npc_dota_hero_zuus', x: 5500, y: 5000, enemy: true },
+  ]
+  const seen = state.ingest(heroFrame(250, fill([self, ...allies, ...withZeus], 16), 'zeus1'), 2000)
+  assert.equal(seen.events.filter((event) => event.type === 'dota.match.lineup').length, 0, '刚变化不立刻发')
+  const fixed = state.ingest(heroFrame(262, fill([self, ...allies, ...withZeus], 16), 'zeus1'), 2100)
+  const correction = fixed.events.find((event) => event.type === 'dota.match.lineup' && event.meta?.correction === true)
+  assert.ok(correction, '该补名单更正')
+  assert.match(correction.text, /名单更正：敌方 .*zuus/)
 })

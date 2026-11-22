@@ -19,6 +19,10 @@ export const LEAVE_GRACE_MS = 6_000
 const MAX_EVENTS = 300
 const MAX_EVENT_AGE_MS = 60 * 60 * 1000
 const CARD_TTL_MS = 1000
+/** 名单事件的稳定窗：这套阵容连续 10 秒没变才发（躲开选人期队色翻转和晚进的英雄）。 */
+const LINEUP_STABLE_SECS = 10
+/** 3:00 还没凑齐就发手上有的（真机局视野慢、敌人陆续可见），缺总比没有强。 */
+const LINEUP_TIMEOUT_CLOCK = 180
 
 export class DotaState {
   constructor({ names = null, rawKeys = false, now = () => Date.now(), cfg = null } = {}) {
@@ -58,6 +62,10 @@ export class DotaState {
     this.modeNote = null
     this.matchKey = null
     this.lineupEmitted = false
+    /** 名单稳定窗观察：{ key, since }，同一套阵容连续 10 秒才发 lineup。 */
+    this.lineupWatch = null
+    /** 已发出名单的敌方键集，变了就要补更正。 */
+    this.lineupEmittedKey = null
     /** 进 playing 后做过一次幻影清扫（bot 局选人残留，见 minimap.sweepPreGamePhantoms）。 */
     this.preGameSwept = false
     /** 自己阵亡后等击杀事件来对账的钩子：{ at }，对不上就给 idmap 记一次 mismatch。 */
@@ -135,6 +143,8 @@ export class DotaState {
       this.mode.reset()
       this.modeNote = null
       this.lineupEmitted = false
+      this.lineupWatch = null
+      this.lineupEmittedKey = null
       this.preGameSwept = false
       this.pendingSelfDeath = null
     }
@@ -168,10 +178,47 @@ export class DotaState {
     const offset = next.gameTime !== null ? clockSec - next.gameTime : 0
     const records = this.stream.ingest(payload?.events, offset)
 
-    // 名单确认齐（strategy 就开始陆续进报文，出兵后发，免得时间戳是负的）。
-    if (!this.lineupEmitted && clockSec >= 0 && this.tracker.rosterComplete()) {
-      this.lineupEmitted = true
-      events.push(this.lineupEvent(next, clockSec))
+    // 名单事件（2026-11-22 两局翻案后重写）：加速局选人时钟是正的、bot 局选人期全场标天辉色，
+    // 旧触发「敌方凑够 5 个就发」会发出发育不全的名单——多报 7 个、漏宙斯都是它。
+    // 新规矩：进游戏（幻影清扫已做）+ 敌我两边都正好 5 个 + 这套名单稳定 10 秒才发；
+    // 3:00 还没凑齐就发手上有的，缺总比没有强。真机局敌人靠视野陆续进名单，稳定条件天然满足。
+    if (!this.lineupEmitted && this.preGameSwept && clockSec >= 0) {
+      const enemies = this.tracker.enemyRoster()
+      const allies = this.tracker.teamRoster(this.tracker.selfTeam ?? 'radiant', 5)
+      const key = `${allies.length}|${enemies.map((hero) => hero.key).sort().join(',')}`
+      if (this.lineupWatch?.key !== key) this.lineupWatch = { key, since: clockSec }
+      const stableFor = clockSec - this.lineupWatch.since
+      if (
+        (enemies.length === 5 && allies.length === 5 && stableFor >= LINEUP_STABLE_SECS) ||
+        clockSec >= LINEUP_TIMEOUT_CLOCK
+      ) {
+        this.lineupEmitted = true
+        this.lineupEmittedKey = enemies.map((hero) => hero.key).sort().join(',')
+        events.push(this.lineupEvent(next, clockSec))
+      }
+    } else if (
+      this.lineupEmitted &&
+      this.preGameSwept &&
+      next.phase === 'playing' &&
+      clockSec >= 0 &&
+      this.tracker.selfTeam
+    ) {
+      // 名单更正（2026-11-22 宙斯案）：发出后名单又变了——漏的人晚进视野、残留被清掉——
+      // 稳定 10 秒后补一条更正，别让她拿着错名单说下去。
+      const enemies = this.tracker.enemyRoster()
+      const key = enemies.map((hero) => hero.key).sort().join(',')
+      if (key !== this.lineupEmittedKey) {
+        if (this.lineupWatch?.key !== key) this.lineupWatch = { key, since: clockSec }
+        if (clockSec - this.lineupWatch.since >= LINEUP_STABLE_SECS) {
+          this.lineupEmittedKey = key
+          const names = enemies.map((hero) => heroName(hero.key, this.names, this.rawKeys) ?? hero.short)
+          events.push({
+            type: 'dota.match.lineup',
+            text: `[刀塔 ${clock(clockSec)}] 名单更正：敌方 ${names.join('/')}。`,
+            meta: { clock: clockSec, phase: next.phase, correction: true },
+          })
+        }
+      }
     }
 
     // D16 的自校验：自己阵亡后 6 个游戏秒内应该有一条 victimId=自己 id 的击杀记录。
