@@ -457,7 +457,17 @@ export class FightEngine {
   flush(now, idmap, showName, selfTeam) {
     const events = []
     if (this.window.length >= FIGHT_MIN_KILLS) {
-      this.emitFight((event) => events.push(event), now, idmap, showName, selfTeam)
+      // 注意：emitFight 的 push 是 (type, text) 两个参数——这里必须收齐两个再组对象。
+      // 2026-11-22 金丝雀实锤：写成 (event) => events.push(event) 会把裸字符串 'dota.fight.ended'
+      // 推进投递数组（字符串没有 type/text，宿主读 text.length 就炸）——这正是 2026-11-15
+      // 连崩 30 次那颗毒事件的产生分支，终局收口这一条路。
+      this.emitFight(
+        (type, text) => events.push({ type, text, meta: { clock: now } }),
+        now,
+        idmap,
+        showName,
+        selfTeam,
+      )
     }
     return events
   }

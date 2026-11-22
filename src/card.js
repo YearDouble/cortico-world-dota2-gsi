@@ -28,7 +28,7 @@ function statusWords(hero) {
 }
 
 export function renderMatchCard(snap, options = {}) {
-  const { names = null, rawKeys = false } = options
+  const { names = null, rawKeys = false, mode = null } = options
   const lines = []
   const phase = snap.phase === 'playing' ? '对局中' : snap.phase === 'pregame' ? '开局准备' : snap.phase === 'draft' ? '选人' : snap.phase === 'strategy' ? '策略时间' : snap.phase === 'postgame' ? '已结束' : '对局中'
 
@@ -38,6 +38,9 @@ export function renderMatchCard(snap, options = {}) {
   if (score) header.push(score)
   if (snap.day === true) header.push('白天')
   if (snap.day === false) header.push('黑夜')
+  // 模式是推断出来的（GSI 不发），标着「推断」让她转告时留个心眼。
+  if (mode === 'turbo') header.push('加速模式（推断）')
+  if (mode === 'regular') header.push('常规模式（推断）')
   if (snap.paused) header.push('暂停中')
   lines.push(`[刀塔战况] ${header.join(' · ')}`)
 

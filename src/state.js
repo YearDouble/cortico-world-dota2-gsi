@@ -52,6 +52,8 @@ export class DotaState {
     this.prompts = new PromptEngine()
     /** 常规/Turbo 推断（GSI 不发 game_mode，见 mode.js）。 */
     this.mode = new ModeInference()
+    /** 模式刚判出来时的那句话，由 ingest 带给 World 记一条日志（一局一条）。 */
+    this.modeNote = null
     this.matchKey = null
     this.lineupEmitted = false
     /** 进 playing 后做过一次幻影清扫（bot 局选人残留，见 minimap.sweepPreGamePhantoms）。 */
@@ -108,7 +110,9 @@ export class DotaState {
     this.record(events, at)
     this.ingestMs += performance.now() - startedAt
     this.ingestCount += 1
-    return { accepted: true, events }
+    const modeNote = this.modeNote
+    this.modeNote = null
+    return { accepted: true, events, modeNote }
   }
 
   /**
@@ -127,6 +131,7 @@ export class DotaState {
       this.fights.reset()
       this.prompts.reset()
       this.mode.reset()
+      this.modeNote = null
       this.lineupEmitted = false
       this.preGameSwept = false
       this.pendingSelfDeath = null
@@ -142,10 +147,21 @@ export class DotaState {
     if (!next.inMatch || next.phase === 'postgame' || clockSec === null || clockSec === undefined) return events
 
     this.tracker.ingest(payload, clockSec, next)
-    // 常规/Turbo 推断：被动金钱和等级先判，肉山本体在 20:00 前露头是 Turbo 的铁证。
+    // 常规/Turbo 推断：被动金钱和补刀单价先判，肉山本体在 20:00 前露头是 Turbo 的铁证。
+    const modeBefore = this.mode.mode
     this.mode.observe(next, clockSec)
     const roshSeen = this.tracker.roshanLastSeen
     if (roshSeen && roshSeen.clock < ROSH_FIRST_SPAWN.regular) this.mode.noteTurbo('roshan')
+    if (modeBefore === 'unknown' && this.mode.mode !== 'unknown') {
+      const label = this.mode.mode === 'turbo' ? '加速' : '常规'
+      const evidence =
+        this.mode.basis === 'income' && this.mode.incomeRate !== null
+          ? `被动金钱 ${this.mode.incomeRate} 金/秒`
+          : this.mode.basis === 'creep' && this.mode.creepBounty !== null
+            ? `补刀单价 ${this.mode.creepBounty} 金/刀`
+            : this.mode.basis
+      this.modeNote = `对局模式判定：${label}（${evidence}）`
+    }
     // 幻影清扫要在名单确认（lineup）之前做，免得选人残留写进阵容事件。
     if (next.phase === 'playing' && !this.preGameSwept) {
       this.preGameSwept = true
@@ -285,6 +301,9 @@ export class DotaState {
 
   record(events, at) {
     for (const event of events) {
+      // 裸字符串这类畸形事件不入库（2026-11-22 金丝雀实锤过 flush 的裸字符串）：
+      // 库里只收对象，dota_events 工具才不会念出 undefined。
+      if (!event || typeof event !== 'object') continue
       this.events.push({ at, type: event.type, text: event.text })
     }
     if (this.events.length > MAX_EVENTS) this.events.splice(0, this.events.length - MAX_EVENTS)
@@ -337,6 +356,7 @@ export class DotaState {
     this.cardCache = renderMatchCard(this.snapshot, {
       names: this.names,
       rawKeys: this.rawKeys,
+      mode: this.mode.mode,
       roshan: { ...this.fights.roshan, now: this.snapshot.clock },
     })
     this.cardAt = at
@@ -364,6 +384,8 @@ export class DotaState {
     if (snap.radiant !== null && snap.dire !== null) header.push(`天辉 ${snap.radiant}–${snap.dire} 夜魇`)
     if (snap.day === true) header.push('白天')
     if (snap.day === false) header.push('黑夜')
+    if (this.mode.mode === 'turbo') header.push('加速模式（推断）')
+    if (this.mode.mode === 'regular') header.push('常规模式（推断）')
     if (snap.paused) header.push('暂停中')
     if (self) {
       const selfShort = show(self.key)

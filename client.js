@@ -34,6 +34,10 @@ const ZH = {
   launchOn: '已设置',
   launchOff: '未设置',
   launchUnknown: '未知',
+  mode: '模式',
+  modeTurbo: '加速',
+  modeRegular: '常规',
+  modeUnknown: '判断中',
   recent: '最近的事件',
   noEvents: '还没有事件。',
   debug: '位置库调试（v0.2）',
@@ -77,6 +81,10 @@ const EN = {
   launchOn: 'set',
   launchOff: 'not set',
   launchUnknown: 'unknown',
+  mode: 'Mode',
+  modeTurbo: 'Turbo',
+  modeRegular: 'Regular',
+  modeUnknown: 'guessing',
   recent: 'Recent events',
   noEvents: 'No events yet.',
   debug: 'Position tracker debug (v0.2)',
@@ -147,6 +155,17 @@ export default {
 
           const launchText = data.dota?.launchOption === 'set' ? t.launchOn : data.dota?.launchOption === 'unset' ? t.launchOff : t.launchUnknown
           pills.append(pill(t.launch, launchText, data.dota?.launchOption === 'set' ? 'on' : 'plain'))
+
+          // 模式（GSI 不发，是推断出来的）：把依据一起摆出来，一眼能看出这局按哪张表走。
+          const modeValue = data.mode?.value ?? 'unknown'
+          const modeLabel = modeValue === 'turbo' ? t.modeTurbo : modeValue === 'regular' ? t.modeRegular : t.modeUnknown
+          const modeEvidence =
+            data.mode?.basis === 'income' && data.mode?.incomeRate !== null
+              ? `${data.mode.incomeRate}金/秒`
+              : data.mode?.basis === 'creep' && data.mode?.creepBounty !== null
+                ? `${data.mode.creepBounty}金/刀`
+                : data.mode?.basis
+          pills.append(pill(t.mode, modeEvidence ? `${modeLabel}（${modeEvidence}）` : modeLabel, modeValue === 'turbo' ? 'on' : 'plain'))
 
           const bits = [`${t.port} ${data.port}`]
           if (data.receiverError) bits.push(data.receiverError)

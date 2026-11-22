@@ -130,7 +130,9 @@ class DotaWorld {
 
   handlePayload(payload) {
     try {
-      const { accepted, events } = this.state.ingest(payload)
+      const { accepted, events, modeNote } = this.state.ingest(payload)
+      // 模式判定一局一条，进 core.log——排查「这局提醒时间为什么不一样」从这里看起。
+      if (modeNote) this.log('info', modeNote)
       if (accepted) {
         for (const event of events) this.deliver(event)
       }
@@ -214,6 +216,11 @@ class DotaWorld {
             : en
               ? 'not in a match'
               : '不在对局中',
+        },
+        {
+          label: en ? 'Mode' : '模式',
+          state: this.state.mode?.mode === 'turbo' ? 'online' : 'offline',
+          hint: this.state.mode ? this.state.mode.debugText() : en ? 'unknown' : '判断中',
         },
       ],
       panels: [
@@ -417,6 +424,12 @@ class DotaWorld {
         launchOption: detected.launchOption,
         launchValue: detected.launchValue,
         library: detected.library,
+      },
+      mode: {
+        value: this.state.mode?.mode ?? 'unknown',
+        basis: this.state.mode?.basis ?? null,
+        incomeRate: this.state.mode?.incomeRate ?? null,
+        creepBounty: this.state.mode?.creepBounty ?? null,
       },
       configText: gsi.gsiConfigText(this.netConfig()),
     }

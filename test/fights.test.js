@@ -195,8 +195,7 @@ test('肉山被杀等盾、发倒计时，到点报刷新（带估）', () => {
   assert.equal(ctx.engine.roshan.estimated, true)
 })
 
-test('小地图看到肉山本体：不用等估时，直接算刷新', () => {
-  const ctx = setup()
+test('小地图看到肉山本体：不用等估时，直接算刷新', () => {  const ctx = setup()
   ctx.idmap.selfId = 0
   const self = { unit: 'npc_dota_hero_axe', x: 0, y: 0, self: true, team: 2 }
   const killed = { kind: 'roshanKilled', key: 'r2', time: 1300, gameTime: 1300, team: 'radiant', killerId: 0 }
@@ -230,6 +229,27 @@ test('肉山时刻能在设置里改：首刷提前、复活基准可调', () =>
   const turbo = setup()
   run(turbo, 1, [], fill([self]), 'playing', { mode: 'turbo' })
   assert.equal(turbo.engine.roshan.phase, 'alive')
+})
+
+test('终局收口 flush 返回完整事件对象（2026-11-22 金丝雀回归）', () => {
+  const ctx = setup()
+  ctx.idmap.selfId = 0
+  ctx.idmap.bind(0, 'npc_dota_hero_axe')
+  // 局末还开着口的团战：两个击杀在窗口里，直接走 flush（postgame 边界那条路）。
+  ctx.engine.window = [
+    { kind: 'kill', key: 'k1', time: 100, victimId: 7, killerId: 0, assists: [], bounty: 280, fb: false },
+    { kind: 'kill', key: 'k2', time: 110, victimId: 8, killerId: 1, assists: [], bounty: 280, fb: false },
+  ]
+  ctx.engine.lastKillTime = 110
+  const events = ctx.engine.flush(130, ctx.idmap, (key) => key, 'radiant')
+  assert.equal(events.length, 1)
+  for (const event of events) {
+    // 2026-11-15 毒事件的形状就是这里推出了裸字符串（type/text 全 undefined）。
+    assert.equal(typeof event, 'object')
+    assert.equal(typeof event.type, 'string')
+    assert.equal(typeof event.text, 'string')
+    assert.match(event.text, /团战结束：/)
+  }
 })
 
 test('位置库判死的塔报带路别的事件，TOWER_KILL 兜底不重复', () => {
