@@ -42,6 +42,9 @@ const ROSH_RESPAWN_MIN = 300
 const ROSH_WAIT_AEGIS = 8
 /** TOWER_KILL 兜底配对窗口（秒）。 */
 const TOWER_MATCH_SECS = 8
+/** 位置库认识这座塔（小地图见过）时多等这么久：2026-11-25 实测塔倒后小地图还画 ~11 秒，
+ *  位置库判死比 TOWER_KILL 晚 ~14 秒，旧窗口 10 秒让每座敌塔都重复报一次。 */
+const TOWER_MATCH_WAIT_LONG = 25
 
 const TEAM_LABEL = { radiant: '天辉', dire: '夜魇' }
 
@@ -203,6 +206,8 @@ export class FightEngine {
           this.roshan.carrierId = record.playerId
         }
       } else if (record.kind === 'towerKill') {
+        // 己方塔（拆塔方是敌人）由 buildings 段血量直接播报（一对一、带路别），兜底只会重复。
+        if (record.killerTeam !== null && record.killerTeam !== selfTeam) continue
         if (!this.towerRecordSeen.has(record.key)) {
           this.towerRecordSeen.add(record.key)
           this.pendingTowerRecords.push(record)
@@ -218,7 +223,7 @@ export class FightEngine {
       this.reportedDeaths.push(death)
       push('dota.map.building', `${stamp(now)} ${death.text ?? this.buildingText(death)}`)
     }
-    this.flushTowerFallbacks(push, now)
+    this.flushTowerFallbacks(push, now, tracker)
 
     // 肉山状态机。
     this.tickRoshan(push, now, idmap, showName)
@@ -327,21 +332,29 @@ export class FightEngine {
     return `${side}${laneLabel(death.lane)}${tier}被摧毁。`
   }
 
-  flushTowerFallbacks(push, now) {
+  flushTowerFallbacks(push, now, tracker = null) {
     if (this.pendingTowerRecords.length === 0) return
     const still = []
     for (const record of this.pendingTowerRecords) {
+      const fallenSide = record.killerTeam === 'radiant' ? 'dire' : 'radiant'
+      // 位置库在表里认识这座塔（小地图见过同侧同级的）就多等一会儿——它判死晚 ~14 秒，等它带路别报。
+      const known = tracker
+        ? [...tracker.buildings.values(), ...tracker.deadBuildings.values()].some(
+            (building) => building.tier === record.tier && building.side === fallenSide,
+          )
+        : false
+      const waitSecs = known ? TOWER_MATCH_WAIT_LONG : TOWER_MATCH_SECS
       const matched = this.reportedDeaths.some(
         (death) =>
           death.tier !== null &&
           record.tier !== null &&
           death.tier === record.tier &&
-          death.side === (record.killerTeam === 'radiant' ? 'dire' : 'radiant') &&
+          death.side === fallenSide &&
           record.time !== null &&
-          Math.abs((death.at ?? now) - (record.time + 0)) <= TOWER_MATCH_SECS + 2,
+          Math.abs((death.at ?? now) - (record.time + 0)) <= Math.max(TOWER_MATCH_WAIT_LONG, TOWER_MATCH_SECS + 2),
       )
       if (matched) continue
-      if (record.time === null || now - record.time < TOWER_MATCH_SECS) {
+      if (record.time === null || now - record.time < waitSecs) {
         still.push(record)
         continue
       }

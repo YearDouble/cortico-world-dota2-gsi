@@ -259,11 +259,8 @@ export function diff(prev, next, options = {}) {
     }
   }
 
-  if (prev.day !== null && next.day !== null && prev.day !== next.day) {
-    // 出兵前 daytime 会从 false 翻成 true，那不是「天亮」，别报。
-    const preGame = (prev.clock !== null && prev.clock < 0) || (next.clock !== null && next.clock <= 0)
-    if (!preGame) push('dota.map.daynight', next.day ? '天亮了。' : '天黑了。')
-  }
+  // 昼夜切换不在这里发：2026-11-25 实测常规局 daytime 会假翻 10 秒（10:37 天黑 → 10:47 天亮），
+  // 防抖挪到 DotaState.trackDay（连续 20 秒才认）。
 
   if (prev.paused !== null && next.paused !== null && prev.paused !== next.paused) {
     push('dota.match.paused', next.paused ? '游戏暂停。' : '游戏继续。')

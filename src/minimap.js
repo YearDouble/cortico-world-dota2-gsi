@@ -155,6 +155,7 @@ export class MinimapTracker {
       }
       if (unitname === 'npc_dota_roshan') {
         // (0,0) 是报文占位（真机归档里出现过），不是真坐标。
+        // 注意：常规局首刷前它也会出现在小地图上（2026-11-25 实测 15:10 起），只喂状态机，别当模式证据。
         if (!(x === 0 && y === 0)) this.roshanLastSeen = { clock, x, y }
         continue
       }
@@ -163,6 +164,9 @@ export class MinimapTracker {
       const team = teamOf(item.team)
       if (!team) continue
       const self = item.image === 'minimap_herocircle_self'
+      // 选人/载入阶段队色全是天辉色（2026-11-25 常规局同样如此），追踪别人只会埋雷：
+      // 进游戏队色翻转后当成「消失 79 秒后现身」，开场 -0:05 报「亚巴顿绕后」。只认自己。
+      if (!self && snap && snap.phase !== 'playing') continue
       if (self) {
         this.selfKey = unitname
         this.selfTeam = team
@@ -213,6 +217,8 @@ export class MinimapTracker {
           side: building.side,
           tier: building.tier,
           lane: building.lane,
+          // 兵营的近战/远程要带出去，否则 buildingText 把两个兵营都说成「远程」（2026-11-25 第二局）。
+          melee: building.melee === true,
           at: clock,
         })
         // 死了就从「还立着」的表里除名；deadBuildings 粘性，复活不了。

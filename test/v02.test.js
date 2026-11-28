@@ -167,7 +167,8 @@ test('bot 局幻影清扫：选人残留不进 lineup，真人重新进图补回
   ]
 
   state.ingest(mk(-30, [self, ...phantoms, ...realAllies, ...realEnemies], 'DOTA_GAMERULES_STATE_STRATEGY_TIME'), 1000)
-  assert.equal(state.tracker.heroesOf('radiant').length, 13, '选人阶段 bot 局敌我全挤天辉栏（已知暂态，含自己）')
+  // 2026-11-25 改：选人期队色全是天辉色（联机常规局同样），只认自己，别人的位置进游戏才追踪。
+  assert.equal(state.tracker.heroesOf('radiant').length, 1, '选人阶段只认自己（别人队色不可信）')
 
   // 开局第一帧：幻影不再出现，真人（含一个换了敌人的重名英雄）重新进图；敌方真实队色是 3。
   const realEnemiesDire = realEnemies.map((hero) => ({ ...hero, team: 3 }))

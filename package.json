@@ -1,6 +1,6 @@
 {
   "name": "cortico-world-dota2-gsi",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "type": "module",
   "main": "src/index.js",
   "license": "MIT",
@@ -47,6 +47,7 @@
       "dota2",
       "game",
       "gsi",
+      "external-setup",
       "experimental"
     ],
     "locales": {

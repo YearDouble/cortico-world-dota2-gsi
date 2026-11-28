@@ -103,6 +103,8 @@ for (const [key, value] of Object.entries(itemConstants)) {
 }
 
 const itemTable = {}
+/** 知识库装备表里没有、或英文名对不上的补充条目（2026-11-25 真机遇到）。 */
+const EXTRA_ITEMS = { famango: '莲花', diffusal_blade: '散失之刃' }
 const itemMissed = []
 for (const { zh, en } of parseItemHeadings(fs.readFileSync(args.items, 'utf8'))) {
   let key = byDname.get(en.toLowerCase())
@@ -117,6 +119,7 @@ for (const { zh, en } of parseItemHeadings(fs.readFileSync(args.items, 'utf8')))
   }
   itemTable[key] = zh
 }
+Object.assign(itemTable, EXTRA_ITEMS)
 
 // 排序输出，diff 稳定。
 const sorted = (table) => Object.fromEntries(Object.entries(table).sort(([a], [b]) => a.localeCompare(b)))

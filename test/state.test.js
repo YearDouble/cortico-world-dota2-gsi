@@ -39,11 +39,33 @@ test('一局完整走完，关键事件都出得来', () => {
     'dota.player.item',
     'dota.map.roshan',
     'dota.map.building',
-    'dota.map.daynight',
     'dota.match.ended',
   ]) {
     assert.ok(types.has(type), `缺少事件：${type}`)
   }
+})
+
+test('昼夜防抖：假翻转不报，连续 20 秒才报（2026-11-25 常规局实测）', () => {
+  const state = new DotaState()
+  const base = frames.find(
+    (frame) => frame.map?.game_state === 'DOTA_GAMERULES_STATE_GAME_IN_PROGRESS' && typeof frame.map.clock_time === 'number',
+  )
+  const frameAt = (clock, day) => {
+    const copy = JSON.parse(JSON.stringify(base))
+    copy.map = { ...copy.map, clock_time: clock, game_time: clock, daytime: day }
+    return copy
+  }
+  const dayEvents = (events) => events.filter((event) => event.type === 'dota.map.daynight')
+  // 白天基线。
+  assert.equal(dayEvents(state.ingest(frameAt(100, true), 1000).events).length, 0)
+  // 假天黑 10 秒就翻回来：不报。
+  assert.equal(dayEvents(state.ingest(frameAt(110, false), 1500).events).length, 0)
+  assert.equal(dayEvents(state.ingest(frameAt(120, true), 2000).events).length, 0)
+  // 真天黑连续 20 秒：报一条。
+  assert.equal(dayEvents(state.ingest(frameAt(130, false), 2500).events).length, 0)
+  const confirmed = dayEvents(state.ingest(frameAt(151, false), 3000).events)
+  assert.equal(confirmed.length, 1)
+  assert.match(confirmed[0].text, /天黑了/)
 })
 
 test('事件文本带时间和事实，不夹带判断', () => {

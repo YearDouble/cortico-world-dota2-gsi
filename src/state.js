@@ -24,6 +24,9 @@ const LINEUP_STABLE_SECS = 10
 /** 3:00 还没凑齐就发手上有的（真机局视野慢、敌人陆续可见），缺总比没有强。 */
 const LINEUP_TIMEOUT_CLOCK = 180
 
+/** 昼夜切换确认时长（秒）：实测常规局 daytime 会假翻 ~10 秒，连续这么久才播报。 */
+const DAY_CHANGE_CONFIRM = 20
+
 export class DotaState {
   constructor({ names = null, rawKeys = false, now = () => Date.now(), cfg = null } = {}) {
     this.names = names
@@ -70,6 +73,8 @@ export class DotaState {
     this.preGameSwept = false
     /** 自己阵亡后等击杀事件来对账的钩子：{ at }，对不上就给 idmap 记一次 mismatch。 */
     this.pendingSelfDeath = null
+    /** 昼夜防抖：{ stable, candidate, since }，候选值连续 20 秒才认（见 trackDay）。 */
+    this.dayState = { stable: null, candidate: null, since: null }
   }
 
   /** 收一帧。返回要投递的事件数组；重复帧返回空。 */
@@ -147,6 +152,7 @@ export class DotaState {
       this.lineupEmittedKey = null
       this.preGameSwept = false
       this.pendingSelfDeath = null
+      this.dayState = { stable: null, candidate: null, since: null }
     }
 
     // 终局：把还开着口的团战先收掉，让 fight.ended 和 match.ended 一起走。
@@ -166,8 +172,10 @@ export class DotaState {
     // 手动模式（面板设置 / dota_mode 工具）优先于一切推断；每帧同步，改了立即生效。
     this.applyModeConfig()
     this.mode.observe(next, clockSec)
-    const roshSeen = this.tracker.roshanLastSeen
-    if (roshSeen && roshSeen.clock < ROSH_FIRST_SPAWN.regular) this.mode.noteTurbo('roshan')
+    // 肉山强信号（2026-11-25 两局翻案）：旧判据「20:00 前小地图看到肉山本体」被常规局打脸——
+    // minimap 里肉山本体本来就会提前出现（第一局 15:10 起 137 帧、第二局开局前 9 秒就有，
+    // 坐标显示它在地图上往两个坑走）。真铁证只有一个：20:00 前肉山真的被打死（加速首刷 0:00）。
+    // 放在 fights.update 之后判，killAt 是事件 time（clock 基准）。
     // 幻影清扫要在名单确认（lineup）之前做，免得选人残留写进阵容事件。
     if (next.phase === 'playing' && !this.preGameSwept) {
       this.preGameSwept = true
@@ -254,6 +262,14 @@ export class DotaState {
         cfgTimings: this.timingsConfig(),
       }),
     )
+    // 加速铁证：常规首刷（20:00）之前肉山就被打死了。minimap 露头只喂状态机，不参与判模式。
+    const roshState = this.fights.roshan
+    if (roshState.deaths > 0 && roshState.killAt !== null && roshState.killAt < ROSH_FIRST_SPAWN.regular) {
+      this.mode.noteTurbo('roshan')
+    }
+    // 昼夜防抖（diff 里不再直接发）：候选值连续 20 秒才认，假翻转直接丢。
+    const dayEvent = this.trackDay(next)
+    if (dayEvent) events.push(dayEvent)
     // 时刻表提醒（莲花/圣水符/经验符）：纯时刻 + 中单条件，见 prompts.js。
     events.push(
       ...this.prompts.tick({
@@ -271,7 +287,9 @@ export class DotaState {
       const evidence =
         this.mode.basis === 'bounty' && this.mode.bountyPickups.length > 0
           ? `赏金符 ${this.mode.bountyPickups.map((p) => `${p.t}s/${p.v}金`).join('、')}`
-          : this.mode.basis === 'xpm' && this.mode.xpm !== null
+          : this.mode.basis === 'roshan' && this.fights.roshan.killAt !== null
+            ? `肉山 ${clock(this.fights.roshan.killAt)} 就被打了（常规 20:00 才首刷）`
+            : this.mode.basis === 'xpm' && this.mode.xpm !== null
             ? `XPM ${this.mode.xpm}`
             : this.mode.basis === 'creep' && this.mode.creepBounty !== null
               ? `补刀单价 ${this.mode.creepBounty} 金/刀`
@@ -281,6 +299,43 @@ export class DotaState {
       this.modeNote = `对局模式判定：${label}（${evidence}）`
     }
     return events
+  }
+
+  /** 设置组 timings.*：逐条覆盖默认时刻（秒，0=关）。缺了就用源码默认表，合法性 prompts.tick 里验。 */
+  /**
+   * 昼夜防抖：daytime 在过渡期会假翻（实测常规局 10:37 天黑、10:47 天亮），
+   * 候选值连续 DAY_CHANGE_CONFIRM 秒没翻回来才算真的，返回要播报的事件或 null。
+   */
+  trackDay(snap) {
+    const day = snap?.day
+    const at = snap?.clock
+    if (typeof day !== 'boolean' || at === null || at === undefined || at <= 0) return null
+    const state = this.dayState
+    if (state.stable === null) {
+      state.stable = day
+      return null
+    }
+    if (day === state.stable) {
+      state.candidate = null
+      state.since = null
+      return null
+    }
+    if (state.candidate !== day) {
+      state.candidate = day
+      state.since = at
+      return null
+    }
+    if (at - state.since < DAY_CHANGE_CONFIRM) return null
+    state.stable = day
+    state.candidate = null
+    state.since = null
+    // 开局头一分钟只更新基线不播报：载入过渡的白天/黑夜会假翻一次（实测 0:21 报过「天亮了」）。
+    if (at < 60) return null
+    return {
+      type: 'dota.map.daynight',
+      text: day ? '天亮了。' : '天黑了。',
+      meta: { clock: at, phase: snap.phase },
+    }
   }
 
   /** 设置组 timings.*：逐条覆盖默认时刻（秒，0=关）。缺了就用源码默认表，合法性 prompts.tick 里验。 */
@@ -432,6 +487,7 @@ export class DotaState {
       names: this.names,
       rawKeys: this.rawKeys,
       mode: this.mode.mode,
+      modeBasis: this.mode.basis,
       roshan: { ...this.fights.roshan, now: this.snapshot.clock },
     })
     this.cardAt = at
